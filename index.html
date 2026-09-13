@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pasar Online Burung & Rekber Otomatis</title>
+    <style>
+        :root {
+            --tokped-green: #03ac03;
+            --tokped-green-dark: #028a02;
+            --bg-body: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #212121;
+            --text-muted: #6d7582;
+            --border-color: #e5e7eb;
+        }
+
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-body); color: var(--text-main); margin: 0; padding-bottom: 70px; }
+        
+        #splash-screen {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #0f172a; z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        #splash-screen.hidden-splash { opacity: 0; visibility: hidden; }
+        .splash-cover-img { width: 100%; max-width: 420px; height: 100%; max-height: 100vh; object-fit: cover; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: absolute; }
+        .splash-content { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; background: rgba(15, 23, 42, 0.80); padding: 24px 30px; border-radius: 16px; backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.15); margin: 20px; text-align: center; }
+        .splash-spinner { width: 35px; height: 35px; border: 3px solid rgba(255, 255, 255, 0.2); border-top: 3px solid #03ac03; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .splash-loader-text { color: #94a3b8; font-size: 11px; font-weight: bold; letter-spacing: 0.8px; text-transform: uppercase; }
+
+        header { background: var(--card-bg); padding: 10px 15px; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; }
+        .top-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .search-container { flex: 1; display: flex; align-items: center; background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 20px; padding: 6px 15px; }
+        .search-container input { width: 100%; background: transparent; border: none; color: var(--text-main); outline: none; font-size: 13px; }
+        .header-icons { display: flex; gap: 14px; align-items: center; font-size: 18px; cursor: pointer; }
+
+        .container { max-width: 600px; margin: auto; padding: 10px; }
+
+        .banner-rekber { background: linear-gradient(135deg, #03ac03, #028a02); color: white; padding: 14px; border-radius: 10px; margin-bottom: 8px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+        .banner-rekber h2 { margin: 0 0 4px 0; font-size: 16px; }
+        .banner-rekber p { margin: 0; font-size: 11px; opacity: 0.9; }
+
+        .running-text-box { background: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 6px; padding: 6px 10px; margin-bottom: 12px; overflow: hidden; white-space: nowrap; font-size: 12px; color: #2e7d32; font-weight: 500; }
+
+        .menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; background: var(--card-bg); padding: 12px; border-radius: 12px; margin-bottom: 10px; text-align: center; }
+        .menu-icon-item { font-size: 11px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-main); position: relative; }
+        .menu-icon-circle { width: 42px; height: 42px; background: #e8f5e9; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+
+        .category-scroll { display: flex; gap: 8px; overflow-x: auto; padding: 10px 15px; scrollbar-width: none; background: var(--card-bg); margin-bottom: 10px; border-radius: 8px; }
+        .category-scroll::-webkit-scrollbar { display: none; }
+        .cat-item { background: var(--bg-body); border: 1px solid var(--border-color); padding: 6px 14px; border-radius: 15px; font-size: 12px; white-space: nowrap; cursor: pointer; color: var(--text-muted); }
+        .cat-item.active { background: var(--tokped-green); border-color: var(--tokped-green); color: white; font-weight: bold; }
+
+        .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .product-card { background: var(--card-bg); border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between; }
+        
+        .product-img-slider { position: relative; width: 100%; height: 150px; background: #111; overflow: hidden; }
+        .product-img-slider img { width: 100%; height: 100%; object-fit: cover; display: none; cursor: pointer; }
+        .product-img-slider img.active-slide { display: block; }
+        .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; padding: 4px 8px; font-size: 12px; cursor: pointer; border-radius: 4px; z-index: 10; }
+        .slider-btn.prev { left: 5px; }
+        .slider-btn.next { right: 5px; }
+        .slider-badge { position: absolute; bottom: 6px; right: 6px; background: rgba(0,0,0,0.6); color: white; font-size: 9px; padding: 2px 6px; border-radius: 10px; z-index: 10; }
+
+        .product-body { padding: 10px; }
+        .product-title { font-size: 12px; color: var(--text-main); margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; font-weight: bold; }
+        .product-price { font-size: 14px; color: #fa591d; font-weight: bold; margin-bottom: 2px; }
+        .product-desc { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        button { border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; transition: 0.2s; }
+        .btn-primary { background: var(--tokped-green); color: white; width: 100%; padding: 10px; }
+        .btn-primary:hover { background: var(--tokped-green-dark); }
+        .btn-outline { background: transparent; border: 1px solid var(--tokped-green); color: var(--tokped-green); padding: 8px; }
+        .btn-danger { background: #dc2626; color: white; padding: 6px 10px; font-size: 11px; }
+
+        .card { background: var(--card-bg); padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--border-color); }
+        .card input, .card select, .card textarea { width: 100%; padding: 10px; margin: 6px 0; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-body); color: var(--text-main); box-sizing: border-box; font-size: 13px; font-family: inherit; }
+
+        .transaction-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; text-align: center; margin-top: 8px; }
+        .trans-item { font-size: 10px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-main); padding: 4px 0; position: relative; }
+        .trans-item span { font-size: 18px; }
+
+        .badge-dot { position: absolute; top: 0; right: 15px; background: #fa591d; color: white; font-size: 9px; font-weight: bold; padding: 1px 5px; border-radius: 10px; display: none; }
+
+        .feed-container { display: flex; flex-direction: column; gap: 15px; }
+        .video-card { background: var(--card-bg); border-radius: 10px; overflow: hidden; border: 1px solid var(--border-color); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .video-header { display: flex; align-items: center; padding: 10px; gap: 8px; border-bottom: 1px solid var(--border-color); }
+        .video-user-avatar { width: 32px; height: 32px; border-radius: 50%; background: #ddd; object-fit: cover; }
+        .video-username { font-size: 12px; font-weight: bold; }
+        .video-player { width: 100%; max-height: 400px; background: #000; object-fit: contain; display: block; }
+        .video-footer { padding: 10px; font-size: 12px; }
+        .video-caption { margin-bottom: 8px; color: var(--text-main); line-height: 1.4; }
+        .video-actions { display: flex; gap: 15px; font-size: 13px; color: var(--text-muted); align-items: center; }
+        .video-action-btn { background: none; border: none; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 4px; color: var(--text-muted); }
+
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; padding: 8px 0; z-index: 990; }
+        .nav-item { background: none; border: none; color: var(--text-muted); font-size: 10px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; width: auto; position: relative; }
+        .nav-item.active { color: var(--tokped-green); font-weight: bold; }
+        .nav-item span { font-size: 16px; }
+
+        #product-modal, #admin-modal, #resi-modal, #review-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 15px; }
+        .modal-content { background: var(--card-bg); width: 100%; max-width: 450px; border-radius: 12px; overflow: hidden; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .modal-body { padding: 15px; overflow-y: auto; flex: 1; }
+        
+        .modal-img-slider { position: relative; width: 100%; height: 260px; background: #111; border-radius: 8px; margin-bottom: 10px; overflow: hidden; }
+        .modal-img-slider img { width: 100%; height: 100%; object-fit: contain; display: none; cursor: pointer; }
+        .modal-img-slider img.active-slide { display: block; }
+
+        .product-action-bar { display: flex; border-top: 1px solid var(--border-color); background: var(--card-bg); padding: 10px 15px; gap: 8px; align-items: center; }
+        .action-icon-btn { background: none; border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 10px; font-size: 14px; cursor: pointer; display: flex; flex-direction: column; align-items: center; font-size: 9px; color: var(--text-muted); }
+        .action-icon-btn span { font-size: 16px; }
+
+        #qty-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1100; display: flex; align-items: flex-end; justify-content: center; }
+        .qty-sheet { background: var(--card-bg); width: 100%; max-width: 450px; border-top-left-radius: 16px; border-top-right-radius: 16px; padding: 15px; box-shadow: 0 -4px 20px rgba(0,0,0,0.15); animation: slideUp 0.2s ease; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        #lightbox-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: flex; align-items: center; justify-content: center; cursor: zoom-out; }
+        #lightbox-img { max-width: 100%; max-height: 100vh; object-fit: contain; transition: transform 0.2s ease; transform-origin: center; cursor: default; }
+
+        .hidden { display: none !important; }
+        .section-view { display: none; }
+        .section-view.active-view { display: block; }
+    </style>
+</head>
+<body>
+
+    <div id="splash-screen">
+        <img src="https://i.ibb.co.com/gbVFfv7t/20260913-183859.jpg" class="splash-cover-img" alt="Sampul Pasar Burung" loading="eager">
+        <div class="splash-content">
+            <div style="font-size: 32px; margin-bottom: 6px;">🦅</div>
+            <div style="color: #ffffff; font-size: 15px; font-weight: bold; letter-spacing: 1px; margin-bottom: 12px; text-align: center;">WELCOME TO APK REKBER</div>
+            <div class="splash-spinner"></div>
+            <div class="splash-loader-text">MEMBUKA PASAR BURUNG ONLINE</div>
+        </div>
+    </div>
+
+    <!-- MODAL PANEL KONTROL ADMIN -->
+    <div id="admin-modal" class="hidden">
+        <div class="modal-content" style="max-width: 500px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: #0f172a; color: white;">
+                <div style="font-weight: bold; font-size: 14px;">🛡️ Panel Kontrol Admin Rekber Pusat</div>
+                <button class="btn-outline" style="padding: 2px 8px; font-size: 11px; color: white; border-color: white;" onclick="tutupPanelAdmin()">✕ Tutup</button>
+            </div>
+            <div class="modal-body" style="background: var(--bg-body);">
+                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">Kelola pesanan, verifikasi resi, & cairkan dana ke penjual setelah barang diterima pembeli.</div>
+                <div id="admin-transactions-container">
+                    <p style="font-size: 12px; color: var(--text-muted); text-align: center;">Memuat data transaksi admin...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL INPUT RESI OLEH PENJUAL -->
+    <div id="resi-modal" class="hidden">
+        <div class="modal-content" style="max-width: 400px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: var(--tokped-green); color: white;">
+                <div style="font-weight: bold; font-size: 14px;">📦 Input Resi & Bukti Kirim Penjual</div>
+                <button class="btn-outline" style="padding: 2px 8px; font-size: 11px; color: white; border-color: white;" onclick="tutupModalResi()">✕</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="resi-trans-id" value="">
+                <div style="font-size: 12px; margin-bottom: 6px;">Masukkan Nomor Resi Pengiriman:</div>
+                <input type="text" id="input-no-resi" placeholder="Contoh: JNT1234567890 atau KIB-EXP">
+                
+                <div style="font-size: 12px; margin: 8px 0 4px 0;">Unggah Foto Paket / Bukti Kirim di Kios:</div>
+                <input type="file" id="input-foto-resi" accept="image/*" style="background: white; padding: 6px; margin-bottom: 10px;">
+                
+                <button class="btn-primary" onclick="submitResiPenjual()">Kirim Resi ke Admin & Pembeli via WA</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL KONFIRMASI SELESAI OLEH PEMBELI (FOTO + ULASAN) -->
+    <div id="review-modal" class="hidden">
+        <div class="modal-content" style="max-width: 400px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: #2563eb; color: white;">
+                <div style="font-weight: bold; font-size: 14px;">⭐ Konfirmasi Barang Diterima & Ulasan</div>
+                <button class="btn-outline" style="padding: 2px 8px; font-size: 11px; color: white; border-color: white;" onclick="tutupModalReview()">✕</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="review-trans-id" value="">
+                <div style="font-size: 12px; margin-bottom: 4px; font-weight: bold;">Unggah Foto Kondisi Burung/Barang Saat Tiba:</div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">Wajib melampirkan foto agar dana bisa diteruskan ke penjual.</div>
+                <input type="file" id="input-foto-diterima" accept="image/*" style="background: white; padding: 6px; margin-bottom: 10px;">
+                
+                <div style="font-size: 12px; margin-bottom: 4px; font-weight: bold;">Ulasan / Komentar Anda:</div>
+                <textarea id="input-ulasan-pembeli" rows="3" placeholder="Burung sehat, packing aman, mantap!"></textarea>
+                
+                <button class="btn-primary" style="background: #2563eb; margin-top: 6px;" onclick="submitKonfirmasiSelesai()">Kirim Konfirmasi ke Admin</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="lightbox-modal" class="hidden" onclick="tutupLightbox()">
+        <span style="position: absolute; top: 15px; right: 20px; color: white; font-size: 24px; font-weight: bold; cursor: pointer; z-index: 2001;" onclick="tutupLightbox()">✕</span>
+        <img id="lightbox-img" onclick="event.stopPropagation()">
+    </div>
+
+    <div id="product-modal" class="hidden">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid var(--border-color);">
+                <div style="font-weight: bold; font-size: 14px;">Detail Produk & Validasi</div>
+                <button class="btn-outline" style="padding: 2px 8px; font-size: 11px;" onclick="tutupModalProduk()">✕ Tutup</button>
+            </div>
+            <div class="modal-body" id="modal-product-body"></div>
+            <div class="product-action-bar" id="modal-action-bar"></div>
+        </div>
+    </div>
+
+    <div id="qty-modal" class="hidden">
+        <div class="qty-sheet">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div style="font-weight: bold; font-size: 14px;">Atur Jumlah Pembelian</div>
+                <button class="btn-outline" style="padding: 2px 6px; font-size: 10px;" onclick="tutupModalQty()">✕</button>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                <img id="qty-modal-img" src="" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;">
+                <div>
+                    <div id="qty-modal-title" style="font-weight: bold; font-size: 12px;">Nama Produk</div>
+                    <div id="qty-modal-price" style="color: #fa591d; font-weight: bold; font-size: 13px;">Rp 0</div>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 12px;">
+                <span>Atur Jumlah & Stok</span>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <button class="btn-outline" style="padding: 4px 10px;" onclick="ubahJumlahBeli(-1)">-</button>
+                    <b id="input-qty-val" style="font-size: 14px;">1</b>
+                    <button class="btn-outline" style="padding: 4px 10px;" onclick="ubahJumlahBeli(1)">+</button>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="konfirmasiBeliLangsung()">Lanjut ke Ringkasan Checkout</button>
+        </div>
+    </div>
+
+    <header>
+        <div class="top-bar">
+            <div class="search-container">
+                <span>🔍</span>
+                <input type="text" id="search-input" placeholder="Cari Murai Batu, Kenari, Pakan..." onkeyup="filterProduk()">
+            </div>
+            <div class="header-icons">
+                <span onclick="bukaPanelAdmin()" title="Panel Khusus Admin Rekber" style="font-size: 16px; background: #e8f5e9; padding: 6px 10px; border-radius: 20px; border: 1px solid #c8e6c9;">🛡️ Admin</span>
+                <span onclick="switchTab('manage-products-view')" title="Pengaturan & Kelola Barang">⚙️</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="container" style="margin-bottom: 50px;">
+
+        <div id="home-view" class="section-view active-view">
+            <div class="banner-rekber">
+                <h2>🛡️ Khusus Rekber Transaksi Burung</h2>
+                <p>Dana aman ditahan admin pusat sampai burung diterima sehat oleh pembeli.</p>
+            </div>
+
+            <div class="running-text-box">
+                <marquee scrollamount="5">⚡ Selamat datang di Pasar Online Burung & Feed Video Pendek • Cek foto & deskripsi, lalu tonton gerakan aslinya di menu Feed! ⚡</marquee>
+            </div>
+
+            <div class="menu-grid">
+                <div class="menu-icon-item" onclick="bukaStatusTransaksi('Semua')">
+                    <div class="menu-icon-circle">📋</div>
+                    <span>Transaksi</span>
+                    <span id="badge-menu-transaksi" class="badge-dot">0</span>
+                </div>
+                <div class="menu-icon-item" onclick="bukaKategoriMenu('Pakan')">
+                    <div class="menu-icon-circle">🌾</div>
+                    <span>Pakan</span>
+                </div>
+                <div class="menu-icon-item" onclick="bukaKategoriMenu('Vitamin')">
+                    <div class="menu-icon-circle">🧪</div>
+                    <span>Vitamin</span>
+                </div>
+                <div class="menu-icon-item" onclick="bukaKategoriMenu('Sangkar')">
+                    <div class="menu-icon-circle">🏠</div>
+                    <span>Sangkar</span>
+                </div>
+            </div>
+
+            <div class="category-scroll">
+                <div class="cat-item active" onclick="filterKategori('Semua')">Semua Barang</div>
+                <div class="cat-item" onclick="filterKategori('Murai Batu')">Murai Batu</div>
+                <div class="cat-item" onclick="filterKategori('Kenari')">Kenari</div>
+                <div class="cat-item" onclick="filterKategori('Pakan')">Pakan & Kroto</div>
+                <div class="cat-item" onclick="filterKategori('Vitamin')">Vitamin & Doping</div>
+                <div class="cat-item" onclick="filterKategori('Sangkar')">Sangkar</div>
+            </div>
+
+            <div style="font-size: 14px; font-weight: bold; margin: 12px 0 8px 0;">Rekomendasi Pilihan Profesional</div>
+            <div class="product-grid" id="live-product-list">
+                <p style="color: var(--text-muted); font-size: 12px;">Memuat produk...</p>
+            </div>
+        </div>
+
+        <div id="feed-view" class="section-view">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div style="font-size: 16px; font-weight: bold;">🎬 Feed Video Real Kicau Mania</div>
+                <button class="btn-primary" style="width: auto; padding: 6px 12px; font-size: 11px;" onclick="switchTab('upload-video-view')">+ Upload Video</button>
+            </div>
+            
+            <div class="feed-container" id="feed-videos-container">
+                <p style="font-size: 12px; color: var(--text-muted); text-align: center;">Memuat video feed...</p>
+            </div>
+        </div>
+
+        <div id="upload-video-view" class="section-view">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                <button class="btn-outline" style="padding: 4px 10px; font-size: 11px;" onclick="switchTab('feed-view')">← Kembali</button>
+                <div style="font-size: 15px; font-weight: bold;">📤 Upload Video Asli Burung (Max 15 Detik)</div>
+            </div>
+
+            <div class="card">
+                <div style="margin: 6px 0;">
+                    <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;"><b>Pilih File Video Pendek:</b></label>
+                    <input type="file" id="video-file-input" accept="video/*" style="background: white; padding: 6px;" onchange="muatPreviewVideo(this)">
+                </div>
+
+                <div id="trim-section" class="hidden" style="margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 10px;">
+                    <p style="font-size: 12px; font-weight: bold; margin-bottom: 6px;">Pratinjau & Atur Durasi:</p>
+                    <video id="preview-video-player" class="video-player" controls style="max-height: 250px; border-radius: 6px; margin-bottom: 8px;"></video>
+                    
+                    <div style="display: flex; gap: 10px; margin-bottom: 8px;">
+                        <div style="flex: 1;">
+                            <label style="font-size: 10px; color: var(--text-muted);">Mulai (Detik):</label>
+                            <input type="number" id="trim-start" value="0" min="0" step="0.5" style="margin:2px 0;">
+                        </div>
+                        <div style="flex: 1;">
+                            <label style="font-size: 10px; color: var(--text-muted);">Selesai (Detik):</label>
+                            <input type="number" id="trim-end" value="15" min="1" step="0.5" style="margin:2px 0;">
+                        </div>
+                    </div>
+                    <button class="btn-outline" style="width: 100%; padding: 6px; font-size: 11px; margin-bottom: 8px;" onclick="ujiRentangTrim()">▶ Putar Bagian Terpilih</button>
+                </div>
+
+                <textarea id="video-caption-input" rows="3" placeholder="Tulis caption & sebutkan nama burung sesuai katalog..."></textarea>
+                <button class="btn-primary" style="margin-top: 8px;" onclick="publikasikanVideo()">Kirim & Publikasikan Video</button>
+            </div>
+        </div>
+
+        <div id="cart-view" class="section-view">
+            <div style="font-size: 15px; font-weight: bold; margin-bottom: 10px;">🛒 Keranjang Belanja</div>
+            <div class="card">
+                <div id="cart-items-container" style="font-size: 12px; margin-bottom: 12px;">Keranjang Anda masih kosong.</div>
+                <button class="btn-primary" id="btn-checkout" onclick="prosesCheckoutKeranjang()" style="display:none;">Buat Pesanan & Lanjutkan</button>
+            </div>
+        </div>
+
+        <!-- TAB CHECKOUT & PEMBAYARAN REKBER -->
+        <div id="checkout-view" class="section-view">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                <button class="btn-outline" style="padding: 4px 10px; font-size: 11px;" onclick="switchTab('home-view')">← Kembali</button>
+                <div style="font-size: 15px; font-weight: bold;">💳 Checkout & Isi Data Pengiriman</div>
+            </div>
+            <div class="card">
+                <div style="font-size: 12px; font-weight: bold; margin-bottom: 6px; color: var(--tokped-green);">📍 Lengkapi Data Pembeli</div>
+                <input type="text" id="buyer-nama-lengkap" placeholder="Nama Lengkap Penerima">
+                <input type="text" id="buyer-whatsapp" placeholder="Nomor WhatsApp Pembeli (Contoh: 08123456789)">
+                <textarea id="buyer-alamat-lengkap" rows="3" placeholder="Alamat Lengkap Pengiriman (Jalan, Kecamatan, Kota, Patokan)"></textarea>
+                
+                <hr style="border:0; border-top:1px solid var(--border-color); margin:10px 0;">
+                
+                <div style="font-size: 12px; font-weight: bold; margin-bottom: 4px;">Informasi Kios Penjual</div>
+                <div style="font-size: 11px; margin-bottom: 2px;"><b>Nama Kios / Penjual:</b> <span id="summary-seller-name">-</span></div>
+                <div style="font-size: 11px; margin-bottom: 10px;"><b>No WhatsApp Penjual:</b> <span id="summary-seller-phone">-</span></div>
+
+                <hr style="border:0; border-top:1px solid var(--border-color); margin:8px 0;">
+
+                <div style="font-size: 12px; font-weight: bold; margin-bottom: 6px;">Rincian Barang</div>
+                <div id="checkout-items-detail" style="font-size: 12px; margin-bottom: 10px;">-</div>
+
+                <hr style="border:0; border-top:1px solid var(--border-color); margin:8px 0;">
+
+                <div style="font-size: 12px; font-weight: bold; margin-bottom: 4px;">Pilih Metode Pembayaran Rekber Pusat</div>
+                <select id="payment-method-select" style="margin-bottom: 8px;" onchange="tampilkanInfoPembayaran()">
+                    <option value="Bank Jago">Bank Jago : 102263644816</option>
+                    <option value="Acount Dana">Acount DANA : +6282213054013</option>
+                    <option value="Acount Gopay">Acount GoPay : +6282213054013</option>
+                </select>
+
+                <div id="box-nomor-pembayaran" style="background: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 6px; padding: 10px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-size: 10px; color: #2e7d32; font-weight: bold;">TUJUAN TRANSFER REKBER:</div>
+                        <div id="text-nomor-tujuan" style="font-size: 13px; font-weight: bold; color: #1b5e20;">102263644816 (Bank Jago)</div>
+                    </div>
+                    <button class="btn-primary" style="padding: 6px 12px; font-size: 11px; width: auto;" onclick="salinNomorPembayaran()">📋 Salin</button>
+                </div>
+
+                <div style="background: var(--bg-body); padding: 10px; border-radius: 6px; margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;"><span>Total Harga Barang</span><b id="sum-price">Rp 0</b></div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;"><span>Biaya Admin Rekber</span><b>Rp 10.000</b></div>
+                    <hr style="border:0; border-top:1px solid var(--border-color); margin:6px 0;">
+                    <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: bold; color: #fa591d;"><span>Total Tagihan Pembeli</span><span id="sum-total">Rp 0</span></div>
+                </div>
+
+                <button class="btn-primary" onclick="eksekusiBayarDanKirimNotif()">🔒 Selesaikan Pembayaran & Kirim WA Otomatis</button>
+            </div>
+        </div>
+
+        <div id="transaksi-view" class="section-view">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                <button class="btn-outline" style="padding: 4px 10px; font-size: 11px;" onclick="switchTab('account-view')">← Kembali</button>
+                <div style="font-size: 15px; font-weight: bold;" id="transaksi-title-header">Daftar Status Pesanan</div>
+            </div>
+            <div class="card" id="list-transaksi-container">
+                <p style="font-size: 12px; color: var(--text-muted);">Belum ada riwayat transaksi.</p>
+            </div>
+        </div>
+
+        <div id="manage-products-view" class="section-view">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                <button class="btn-outline" style="padding: 4px 10px; font-size: 11px;" onclick="switchTab('home-view')">← Kembali</button>
+                <div style="font-size: 15px; font-weight: bold;">⚙️ Kelola Barang Kios Anda</div>
+            </div>
+
+            <div class="card">
+                <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px;" id="form-product-title-label">Posting Burung / Barang Baru</div>
+                <input type="hidden" id="edit-product-id" value="">
+                <input type="text" id="bird-name" placeholder="Nama Burung (Contoh: Murai Batu Fighter)">
+                <input type="number" id="bird-price" placeholder="Harga (Contoh: 2500000)">
+                <input type="text" id="bird-category" placeholder="Kategori (Murai Batu / Kenari / Pakan / Vitamin / Sangkar)">
+                
+                <div style="margin: 8px 0; background: var(--bg-body); padding: 8px; border-radius: 6px; border: 1px solid var(--border-color);">
+                    <label style="font-size: 11px; color: var(--text-main); display: block; margin-bottom: 4px;"><b>Unggah 1 sampai 3 Foto Burung:</b></label>
+                    <input type="file" id="bird-img-1" accept="image/*" style="background: white; padding: 4px; margin-bottom: 4px;">
+                    <input type="file" id="bird-img-2" accept="image/*" style="background: white; padding: 4px; margin-bottom: 4px;">
+                    <input type="file" id="bird-img-3" accept="image/*" style="background: white; padding: 4px;">
+                </div>
+
+                <textarea id="bird-desc" rows="4" placeholder="Deskripsi lengkap (Contoh: Umur 8 bulan, volume tebal, mental jalan. Untuk video aksi & gerakannya, silahkan cek di 👉 Feed)"></textarea>
+                <button class="btn-primary" style="margin-top: 8px;" id="btn-submit-product" onclick="simpanProduk()">Publikasikan Produk</button>
+                <button class="btn-outline" style="width:100%; margin-top:6px;" id="btn-cancel-edit" onclick="resetFormProduk()" style="display:none;">Batal Edit</button>
+            </div>
+
+            <div class="card">
+                <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px;">Daftar Barang di Kios Anda (Edit / Hapus)</div>
+                <div id="seller-product-list">
+                    <p style="font-size: 12px; color: var(--text-muted);">Memuat barang kios...</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="account-view" class="section-view">
+            <div class="card" style="padding: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: bold; margin-bottom: 4px;">
+                    <span>Transaksi Saya</span>
+                    <span style="font-size: 11px; color: var(--tokped-green); cursor: pointer;" onclick="bukaStatusTransaksi('Semua')">Lihat Semua ›</span>
+                </div>
+                <div class="transaction-grid">
+                    <div class="trans-item" onclick="bukaStatusTransaksi('Menunggu Verifikasi Dana')"><span>💳</span><span>Bayar</span></div>
+                    <div class="trans-item" onclick="bukaStatusTransaksi('Sedang Dikemas')"><span>📦</span><span>Dikemas</span></div>
+                    <div class="trans-item" onclick="bukaStatusTransaksi('Sedang Dikirim')"><span>🚚</span><span>Dikirim</span></div>
+                    <div class="trans-item" onclick="bukaStatusTransaksi('Pesanan Selesai')"><span>📦</span><span>Selesai</span></div>
+                    <div class="trans-item" onclick="bukaStatusTransaksi('Dibatalkan')"><span>❌</span><span>Batal</span></div>
+                </div>
+            </div>
+
+            <div id="auth-box" class="card">
+                <div style="font-size: 15px; font-weight: bold; margin-bottom: 5px;">Masuk / Daftar Akun Penjual</div>
+                <input type="email" id="reg-email" placeholder="Email Wajib">
+                <input type="password" id="reg-password" placeholder="Kata Sandi">
+                <input type="text" id="reg-phone" placeholder="Nomor WhatsApp Aktif Penjual (Contoh: 08123456789)">
+                <input type="text" id="reg-storename" placeholder="Nama Kios / Toko Burung">
+                <input type="text" id="reg-address" placeholder="Alamat Lengkap Kios">
+                <button class="btn-primary" id="btn-register-store" style="margin-top: 8px;">Daftar Toko & Akun</button>
+                <button class="btn-outline" id="btn-login-toggle" style="width:100%; margin-top: 5px;">Sudah punya akun? Masuk</button>
+            </div>
+
+            <div id="dashboard-box" class="card hidden">
+                <div style="font-weight: bold; font-size: 14px;" id="profile-storename-display">-</div>
+                <p style="font-size: 11px; color: var(--tokped-green);" id="user-display-email">-</p>
+                <button class="btn-outline" style="width:100%; margin-top:8px;" onclick="switchTab('manage-products-view')">⚙️ Kelola Produk Kios Saya</button>
+                <button class="btn-danger" id="btn-logout" style="margin-top: 8px;">Keluar (Logout)</button>
+            </div>
+            <p id="status-msg" style="text-align: center; font-size: 12px;"></p>
+        </div>
+
+    </div>
+
+    <nav class="bottom-nav" id="main-bottom-nav">
+        <button class="nav-item active" onclick="switchTab('home-view')"><span>🏠</span> Home</button>
+        <button class="nav-item" onclick="switchTab('feed-view')"><span>🔥</span> Feed</button>
+        <button class="nav-item" onclick="switchTab('cart-view')"><span>🛒</span> Keranjang</button>
+        <button class="nav-item" onclick="switchTab('account-view')"><span>👤</span> Akun</button>
+    </nav>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDfQXHDI8PFBbq5_bOWEmzg40RIrM1egJk",
+            authDomain: "pasar-online-bird.firebaseapp.com",
+            projectId: "pasar-online-bird",
+            storageBucket: "pasar-online-bird.firebasestorage.app",
+            messagingSenderId: "652568801086",
+            appId: "1:652568801086:web:f474411c5f9b3b70ca466f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let semuaProduk = [];
+        let semuaVideo = [];
+        let keranjang = [];
+        let semuaTransaksi = [];
+        let semuaPenjual = [];
+        let sellerDocIdGlobal = null;
+        let currentUserStoreName = "Kios Kicau Mania";
+
+        let activeCheckoutItem = null;
+        let activeQtyBeli = 1;
+        let isFirstLoadTransactions = true;
+
+        window.addEventListener('load', () => {
+            // Memutar nada kicauan burung saat aplikasi pertama kali dibuka (bersamaan dengan splash screen)
+            putarNadaKicauanBurung();
+
+            setTimeout(() => {
+                const splash = document.getElementById('splash-screen');
+                if(splash) splash.classList.add('hidden-splash');
+            }, 1200);
+            loadKatalog();
+            loadFeedVideo();
+            loadSemuaPenjual();
+            inisialisasiRealtimeAdmin();
+        });
+
+        // Fungsi Audio Nada Kicauan Burung Pembuka
+        function putarNadaKicauanBurung() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                let now = audioCtx.currentTime;
+                
+                // Efek modulasi suara bernada tinggi menyerupai kicauan burung
+                [0, 0.15, 0.3, 0.45].forEach((delay, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    
+                    osc.type = 'sine';
+                    let freq = 1200 + (idx * 300) - (idx % 2 * 400);
+                    osc.frequency.setValueAtTime(freq, now + delay);
+                    osc.frequency.exponentialRampToValueAtTime(freq + 600, now + delay + 0.1);
+                    
+                    gain.gain.setValueAtTime(0.15, now + delay);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.12);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    
+                    osc.start(now + delay);
+                    osc.stop(now + delay + 0.12);
+                });
+            } catch (e) { console.log("Audio dibatasi browser saat load."); }
+        }
+
+        function picuNotifikasiAdmin() {
+            if ("vibrate" in navigator) {
+                navigator.vibrate([300, 150, 300, 150, 300]);
+            }
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                oscillator.type = 'triangle';
+                oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.4);
+            } catch (e) { console.log("Audio dibatasi browser."); }
+        }
+
+        function inisialisasiRealtimeAdmin() {
+            onSnapshot(collection(db, "transactions"), (snapshot) => {
+                let adaDataBaru = false;
+                semuaTransaksi = [];
+                
+                snapshot.forEach(d => {
+                    semuaTransaksi.push({ id: d.id, ...d.data() });
+                });
+
+                if (!isFirstLoadTransactions) {
+                    snapshot.docChanges().forEach((change) => {
+                        if (change.type === "added") adaDataBaru = true;
+                    });
+                } else {
+                    isFirstLoadTransactions = false;
+                }
+
+                if (adaDataBaru) picuNotifikasiAdmin();
+
+                let badge = document.getElementById("badge-menu-transaksi");
+                if(semuaTransaksi.length > 0) {
+                    badge.textContent = semuaTransaksi.length;
+                    badge.style.display = "inline-block";
+                }
+
+                renderListAdmin();
+            });
+        }
+
+        async function loadSemuaPenjual() {
+            try {
+                const qs = await getDocs(collection(db, "sellers"));
+                semuaPenjual = [];
+                qs.forEach(d => semuaPenjual.push(d.data()));
+            } catch(e) { console.error(e); }
+        }
+
+        window.bukaPanelAdmin = function() {
+            let pin = prompt("Masukkan PIN Keamanan Admin Rekber:");
+            if(pin !== "le@kejor@85") {
+                alert("PIN Admin salah!");
+                return;
+            }
+            document.getElementById("admin-modal").classList.remove("hidden");
+            renderListAdmin();
+        }
+
+        window.tutupPanelAdmin = function() {
+            document.getElementById("admin-modal").classList.add("hidden");
+        }
+
+        function renderListAdmin() {
+            const container = document.getElementById("admin-transactions-container");
+            if(!container) return;
+
+            if(semuaTransaksi.length === 0) {
+                container.innerHTML = `<p style="font-size: 12px; color: var(--text-muted); text-align: center;">Belum ada transaksi masuk.</p>`;
+                return;
+            }
+
+            let html = "";
+            semuaTransaksi.forEach((t) => {
+                let formatTotal = Number(t.total || 0).toLocaleString('id-ID');
+                let buyerName = t.buyerName || "Pembeli";
+                let buyerPhone = t.buyerPhone || "-";
+                let buyerAddress = t.buyerAddress || "-";
+                let sellerName = t.sellerName || "Penjual";
+                let sellerPhone = t.sellerPhone || "-";
+                let itemsText = t.items || "-";
+                let noResi = t.noResi || "-";
+                let reviewPhoto = t.reviewPhoto || "";
+                let ulasan = t.ulasan || "-";
+                
+                let tombolAdminAksi = "";
+                if(t.status === "Sedang Dikirim" && reviewPhoto) {
+                    tombolAdminAksi = `
+                        <button class="btn-primary" style="background: #03ac03; margin-top:6px;" onclick="adminCairkanDana('${t.id}', '${sellerPhone}', '${sellerName}', '${formatTotal}')">
+                            💰 Validasi & Cairkan Dana ke Penjual
+                        </button>
+                    `;
+                }
+
+                html += `
+                    <div style="background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 10px; font-size: 12px;">
+                        <div style="font-weight: bold; margin-bottom: 4px; color: var(--tokped-green);">🛒 ${itemsText}</div>
+                        <div style="margin-bottom: 2px;"><b>Pembeli:</b> ${buyerName} (${buyerPhone})</div>
+                        <div style="margin-bottom: 2px;"><b>Alamat:</b> ${buyerAddress}</div>
+                        <div style="margin-bottom: 2px;"><b>Kios Penjual:</b> ${sellerName} (WA: ${sellerPhone})</div>
+                        <div style="margin-bottom: 2px;"><b>No Resi:</b> <span style="color:#2563eb; font-weight:bold;">${noResi}</span></div>
+                        <div style="margin-bottom: 4px; color: #fa591d; font-weight: bold;">Total Tagihan: Rp ${formatTotal}</div>
+                        <div style="margin-bottom: 4px;"><b>Status:</b> <span style="color: #2563eb;">${t.status}</span></div>
+                        
+                        ${reviewPhoto ? `<div style="margin:4px 0;"><b>Foto Diterima Pembeli:</b><br><img src="${reviewPhoto}" style="width:70px; height:70px; object-fit:cover; border-radius:4px; cursor:pointer;" onclick="bukaLightbox('${reviewPhoto}')"></div>` : ''}
+                        ${ulasan !== '-' ? `<div style="margin-bottom:4px;"><b>Ulasan:</b> "${ulasan}"</div>` : ''}
+
+                        <div style="display: flex; gap: 6px; margin-top:6px;">
+                            <button class="btn-primary" style="background: #25D366; flex: 1; padding: 6px; font-size: 11px;" onclick="kirimWAPenjual('${sellerPhone}', '${buyerName}', '${itemsText}', '${buyerAddress}', '${formatTotal}')">
+                                📤 WA Penjual
+                            </button>
+                            <button class="btn-primary" style="background: #0f172a; flex: 1; padding: 6px; font-size: 11px;" onclick="kirimWAAdminPusat('${buyerName}', '${sellerName}', '${itemsText}', '${formatTotal}')">
+                                🛡️ Lapor Admin
+                            </button>
+                        </div>
+                        ${tombolAdminAksi}
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        window.adminCairkanDana = async function(transId, sellerPhone, sellerName, total) {
+            if(!confirm(`Cairkan dana sebesar Rp ${total} ke penjual ${sellerName}?`)) return;
+            try {
+                await updateDoc(doc(db, "transactions", transId), {
+                    status: "Pesanan Selesai & Dana Dicairkan"
+                });
+                alert("Dana berhasil dicairkan ke penjual!");
+                
+                let cleanPhone = sellerPhone.replace(/^0/, '62');
+                let pesan = `Halo Kios *${sellerName}*,\n\nPesanan telah dikonfirmasi diterima oleh pembeli dengan ulasan yang baik.\nAdmin Pusat telah **mencairkan dana sebesar Rp ${total}** ke rekening/e-wallet Anda.\n\nTerima kasih telah bertransaksi di Pasar Burung Online Rekber!`;
+                window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(pesan)}`, '_blank');
+            } catch(e) { alert("Gagal mencairkan: " + e.message); }
+        }
+
+        window.kirimWAPenjual = function(phone, buyerName, items, address, total) {
+            if(!phone || phone === "-") { alert("Nomor WhatsApp penjual tidak tersedia."); return; }
+            let cleanPhone = phone.replace(/^0/, '62');
+            const pesan = `Halo Kios, dana untuk pesanan *${items}* sebesar Rp *${total}* sudah aman dipegang oleh *Rekber Pusat*.\n\nMohon segera kirim pesanan ke alamat:\n- Pembeli: ${buyerName}\n- Alamat: ${address}\n\nSetelah dikirim, masukkan nomor resinya langsung di aplikasi ya!`;
+            window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(pesan)}`, '_blank');
+        }
+
+        window.kirimWAAdminPusat = function(buyer, seller, items, total) {
+            const adminPhone = "6282213054013";
+            const pesan = `Laporan Rekber Pusat:\n- Pembeli: ${buyer}\n- Penjual: ${seller}\n- Barang: ${items}\n- Total: Rp ${total}`;
+            window.open(`https://wa.me/${adminPhone}?text=${encodeURIComponent(pesan)}`, '_blank');
+        }
+
+        window.switchTab = function(viewId) {
+            document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active-view'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(viewId).classList.add('active-view');
+            
+            if(viewId === 'home-view') document.querySelectorAll('.nav-item')[0].classList.add('active');
+            if(viewId === 'feed-view') document.querySelectorAll('.nav-item')[1].classList.add('active');
+            if(viewId === 'cart-view') document.querySelectorAll('.nav-item')[2].classList.add('active');
+            if(viewId === 'account-view') document.querySelectorAll('.nav-item')[3].classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        window.bukaLightbox = function(url) {
+            const modal = document.getElementById("lightbox-modal");
+            const img = document.getElementById("lightbox-img");
+            img.src = url;
+            modal.classList.remove("hidden");
+        }
+
+        window.tutupLightbox = function() {
+            document.getElementById("lightbox-modal").classList.add("hidden");
+        }
+
+        window.geserSlide = function(event, cardId, arah) {
+            event.stopPropagation();
+            const container = document.getElementById(`slider-${cardId}`);
+            if(!container) return;
+            const slides = container.querySelectorAll('img');
+            let currentIndex = 0;
+            slides.forEach((s, idx) => {
+                if(s.classList.contains('active-slide')) currentIndex = idx;
+            });
+            
+            slides[currentIndex].classList.remove('active-slide');
+            let newIndex = currentIndex + arah;
+            if(newIndex >= slides.length) newIndex = 0;
+            if(newIndex < 0) newIndex = slides.length - 1;
+            
+            slides[newIndex].classList.add('active-slide');
+            
+            const badge = document.getElementById(`badge-${cardId}`);
+            if(badge) badge.textContent = `${newIndex + 1}/${slides.length}`;
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            const authBox = document.getElementById("auth-box");
+            const dashboardBox = document.getElementById("dashboard-box");
+            if (user) {
+                authBox.classList.add("hidden");
+                dashboardBox.classList.remove("hidden");
+                document.getElementById("user-display-email").textContent = user.email;
+                try {
+                    const q = query(collection(db, "sellers"), where("uid", "==", user.uid));
+                    const qs = await getDocs(q);
+                    if (!qs.empty) {
+                        sellerDocIdGlobal = qs.docs[0].id;
+                        currentUserStoreName = qs.docs[0].data().storeName || "Kios Kicau";
+                        document.getElementById("profile-storename-display").textContent = currentUserStoreName;
+                    }
+                } catch(e) { console.error(e); }
+                loadBarangPenjual();
+            } else {
+                authBox.classList.remove("hidden");
+                dashboardBox.classList.add("hidden");
+                currentUserStoreName = "Kicau Mania";
+            }
+        });
+
+        document.getElementById("btn-register-store").addEventListener("click", async () => {
+            const email = document.getElementById("reg-email").value;
+            const password = document.getElementById("reg-password").value;
+            const phone = document.getElementById("reg-phone").value;
+            const storeName = document.getElementById("reg-storename").value;
+            const address = document.getElementById("reg-address").value;
+
+            if(!email || !password || !phone || !storeName) {
+                alert("Mohon lengkapi data pendaftaran toko!");
+                return;
+            }
+            try {
+                const cred = await createUserWithEmailAndPassword(auth, email, password);
+                await addDoc(collection(db, "sellers"), { uid: cred.user.uid, email, phone, storeName, address });
+                alert("Pendaftaran Kios Berhasil!");
+                loadSemuaPenjual();
+            } catch(e) { alert("Gagal: " + e.message); }
+        });
+
+        document.getElementById("btn-login-toggle").addEventListener("click", () => {
+            const email = prompt("Email:");
+            const password = prompt("Password:");
+            if(email && password) signInWithEmailAndPassword(auth, email, password).catch(e => alert(e.message));
+        });
+
+        document.getElementById("btn-logout").addEventListener("click", () => signOut(auth));
+
+        function bacaFileBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = err => reject(err);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        window.simpanProduk = async function() {
+            const editId = document.getElementById("edit-product-id").value;
+            const name = document.getElementById("bird-name").value;
+            const price = document.getElementById("bird-price").value;
+            const category = document.getElementById("bird-category").value || "Umum";
+            const desc = document.getElementById("bird-desc").value;
+            
+            const file1 = document.getElementById("bird-img-1").files[0];
+            const file2 = document.getElementById("bird-img-2").files[0];
+            const file3 = document.getElementById("bird-img-3").files[0];
+
+            if(!name || !price) { alert("Nama dan harga wajib diisi!"); return; }
+            try {
+                let fotoList = [];
+                if(file1) fotoList.push(await bacaFileBase64(file1));
+                if(file2) fotoList.push(await bacaFileBase64(file2));
+                if(file3) fotoList.push(await bacaFileBase64(file3));
+
+                let sellerPhoneData = "082213054013";
+                let foundS = semuaPenjual.find(s => s.email === (auth.currentUser ? auth.currentUser.email : ""));
+                if(foundS) sellerPhoneData = foundS.phone;
+
+                if(editId) {
+                    let updateData = { namaBurung: name, harga: Number(price), kategori: category, deskripsi: desc };
+                    if(fotoList.length > 0) updateData.fotoList = fotoList;
+                    await updateDoc(doc(db, "products", editId), updateData);
+                    alert("Produk berhasil diperbarui!");
+                } else {
+                    if(fotoList.length === 0) {
+                        fotoList.push('https://images.unsplash.com/photo-1552728089-57bdde30beb3');
+                    }
+                    await addDoc(collection(db, "products"), {
+                        namaBurung: name, harga: Number(price), kategori: category, deskripsi: desc, fotoList: fotoList,
+                        penjualEmail: auth.currentUser ? auth.currentUser.email : "guest@market.com",
+                        penjualName: currentUserStoreName,
+                        penjualPhone: sellerPhoneData,
+                        createdAt: new Date()
+                    });
+                    alert("Produk berhasil dipublikasikan!");
+                }
+                resetFormProduk();
+                loadKatalog();
+                loadBarangPenjual();
+                switchTab('home-view');
+            } catch(e) { alert("Gagal: " + e.message); }
+        }
+
+        window.resetFormProduk = function() {
+            document.getElementById("edit-product-id").value = "";
+            document.getElementById("bird-name").value = "";
+            document.getElementById("bird-price").value = "";
+            document.getElementById("bird-category").value = "";
+            document.getElementById("bird-desc").value = "";
+            document.getElementById("bird-img-1").value = "";
+            document.getElementById("bird-img-2").value = "";
+            document.getElementById("bird-img-3").value = "";
+            document.getElementById("form-product-title-label").textContent = "Posting Burung / Barang Baru";
+            document.getElementById("btn-submit-product").textContent = "Publikasikan Produk";
+            document.getElementById("btn-cancel-edit").style.display = "none";
+        }
+
+        window.editProduk = function(id) {
+            let p = semuaProduk.find(x => x.id === id);
+            if(!p) return;
+            document.getElementById("edit-product-id").value = p.id;
+            document.getElementById("bird-name").value = p.namaBurung;
+            document.getElementById("bird-price").value = p.harga;
+            document.getElementById("bird-category").value = p.kategori || "";
+            document.getElementById("bird-desc").value = p.deskripsi || "";
+            document.getElementById("form-product-title-label").textContent = "Edit Barang Kios";
+            document.getElementById("btn-submit-product").textContent = "Simpan Perubahan";
+            document.getElementById("btn-cancel-edit").style.display = "block";
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        window.hapusProduk = async function(id) {
+            if(!confirm("Yakin ingin menghapus produk ini dari kios?")) return;
+            try {
+                await deleteDoc(doc(db, "products", id));
+                alert("Produk berhasil dihapus.");
+                loadKatalog();
+                loadBarangPenjual();
+            } catch(e) { alert("Gagal menghapus: " + e.message); }
+        }
+
+        window.loadBarangPenjual = async function() {
+            const container = document.getElementById("seller-product-list");
+            if(!auth.currentUser) {
+                container.innerHTML = "<p style='font-size:12px; color:var(--text-muted);'>Silakan login sebagai penjual.</p>";
+                return;
+            }
+            try {
+                let filtered = semuaProduk.filter(p => p.penjualEmail === auth.currentUser.email);
+                if(filtered.length === 0) {
+                    container.innerHTML = "<p style='font-size:12px; color:var(--text-muted);'>Belum ada barang di kios Anda.</p>";
+                    return;
+                }
+                let html = "";
+                filtered.forEach(p => {
+                    let img = (p.fotoList && p.fotoList[0]) ? p.fotoList[0] : 'https://images.unsplash.com/photo-1552728089-57bdde30beb3';
+                    html += `
+                        <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-body); padding:8px; border-radius:6px; margin-bottom:6px;">
+                            <div style="display:flex; gap:8px; align-items:center;">
+                                <img src="${img}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;">
+                                <div>
+                                    <div style="font-size:12px; font-weight:bold;">${p.namaBurung}</div>
+                                    <div style="font-size:11px; color:#fa591d;">Rp ${Number(p.harga).toLocaleString('id-ID')}</div>
+                                </div>
+                            </div>
+                            <div style="display:flex; gap:4px;">
+                                <button class="btn-outline" style="padding:4px 8px; font-size:10px;" onclick="editProduk('${p.id}')">Edit</button>
+                                <button class="btn-danger" style="padding:4px 8px; font-size:10px;" onclick="hapusProduk('${p.id}')">Hapus</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            } catch(e) { console.error(e); }
+        }
+
+        window.loadKatalog = async function() {
+            try {
+                const qs = await getDocs(collection(db, "products"));
+                semuaProduk = [];
+                qs.forEach(d => {
+                    let data = d.data();
+                    if(!data.fotoList && data.foto) data.fotoList = [data.foto];
+                    else if(!data.fotoList) data.fotoList = ['https://images.unsplash.com/photo-1552728089-57bdde30beb3'];
+                    if(!data.penjualName) data.penjualName = "Kios Kicau Mania";
+                    if(!data.penjualPhone) data.penjualPhone = "082213054013";
+                    semuaProduk.push({ id: d.id, ...data });
+                });
+                renderProduk(semuaProduk);
+                if(auth.currentUser) loadBarangPenjual();
+            } catch(e) { console.error(e); }
+        }
+
+        window.renderProduk = function(data) {
+            let html = "";
+            data.forEach((p) => {
+                let cardId = `pcard-${p.id}`;
+                let imgs = p.fotoList || ['https://images.unsplash.com/photo-1552728089-57bdde30beb3'];
+                
+                let sliderImgsHtml = "";
+                imgs.forEach((imgSrc, i) => {
+                    let activeClass = i === 0 ? 'active-slide' : '';
+                    sliderImgsHtml += `<img src="${imgSrc}" class="${activeClass}" onclick="bukaLightbox('${imgSrc}')" onerror="this.src='https://images.unsplash.com/photo-1552728089-57bdde30beb3'">`;
+                });
+
+                let navButtonsHtml = "";
+                if(imgs.length > 1) {
+                    navButtonsHtml = `
+                        <button class="slider-btn prev" onclick="geserSlide(event, '${cardId}', -1)">‹</button>
+                        <button class="slider-btn next" onclick="geserSlide(event, '${cardId}', 1)">›</button>
+                    `;
+                }
+
+                let deskripsiSingkat = p.deskripsi || 'Tidak ada deskripsi.';
+                
+                html += `
+                    <div class="product-card">
+                        <div class="product-img-slider" id="slider-${cardId}">
+                            ${sliderImgsHtml}
+                            ${navButtonsHtml}
+                            <div class="slider-badge" id="badge-${cardId}">1/${imgs.length}</div>
+                        </div>
+                        <div class="product-body">
+                            <div class="product-title" onclick="bukaDetailProduk('${p.id}')">${p.namaBurung}</div>
+                            <div class="product-price">Rp ${Number(p.harga).toLocaleString('id-ID')}</div>
+                            <div class="product-desc">${deskripsiSingkat}</div>
+                            <button class="btn-primary" style="margin-top:6px; padding:6px;" onclick="bukaDetailProduk('${p.id}')">Lihat Detail & Beli</button>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById("live-product-list").innerHTML = html || "<p style='font-size:12px; color:var(--text-muted);'>Belum ada produk.</p>";
+        }
+
+        window.bukaDetailProduk = function(id) {
+            let p = semuaProduk.find(x => x.id === id);
+            if(!p) return;
+            let modalCardId = `modal-card-${p.id}`;
+            let imgs = p.fotoList || ['https://images.unsplash.com/photo-1552728089-57bdde30beb3'];
+            
+            let modalSliderImgs = "";
+            imgs.forEach((imgSrc, i) => {
+                let activeClass = i === 0 ? 'active-slide' : '';
+                modalSliderImgs += `<img src="${imgSrc}" class="${activeClass}" onclick="bukaLightbox('${imgSrc}')" onerror="this.src='https://images.unsplash.com/photo-1552728089-57bdde30beb3'">`;
+            });
+
+            let modalNavBtns = "";
+            if(imgs.length > 1) {
+                modalNavBtns = `
+                    <button class="slider-btn prev" onclick="geserSlide(event, '${modalCardId}', -1)">‹</button>
+                    <button class="slider-btn next" onclick="geserSlide(event, '${modalCardId}', 1)">›</button>
+                `;
+            }
+
+            let modalBody = document.getElementById("modal-product-body");
+            modalBody.innerHTML = `
+                <div class="modal-img-slider" id="slider-${modalCardId}" style="height: 250px;">
+                    ${modalSliderImgs}
+                    ${modalNavBtns}
+                    <div class="slider-badge" id="badge-${modalCardId}">1/${imgs.length}</div>
+                </div>
+                <div style="font-size:16px; font-weight:bold; margin-bottom:4px;">${p.namaBurung}</div>
+                <div style="font-size:15px; color:#fa591d; font-weight:bold; margin-bottom:4px;">Rp ${Number(p.harga).toLocaleString('id-ID')}</div>
+                <div style="font-size:11px; color:var(--tokped-green); font-weight:bold; margin-bottom:2px;">Kios: ${p.penjualName || 'Kios Kicau'}</div>
+                <div style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">Kategori: ${p.kategori || 'Umum'}</div>
+                <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px; font-weight:bold;">Deskripsi:</div>
+                <div style="font-size:12px; color:var(--text-main); line-height:1.4; margin-bottom:10px; background:var(--bg-body); padding:8px; border-radius:6px; white-space: pre-line;">${p.deskripsi || 'Tidak ada deskripsi.'}</div>
+            `;
+
+            let actionBar = document.getElementById("modal-action-bar");
+            actionBar.innerHTML = `
+                <button class="action-icon-btn" onclick="hubungiPenjual('${p.penjualName}')"><span>💬</span>Hubungi</button>
+                <button class="action-icon-btn" onclick="tambahKeranjang('${p.id}'); tutupModalProduk();"><span>🛒</span>+Keranjang</button>
+                <button class="btn-primary" style="flex:1; padding:10px;" onclick="bukaModalQty('${p.id}')">Beli Langsung</button>
+            `;
+
+            document.getElementById("product-modal").classList.remove("hidden");
+        }
+
+        window.tutupModalProduk = function() {
+            document.getElementById("product-modal").classList.add("hidden");
+        }
+
+        window.hubungiPenjual = function(storeName) {
+            alert(`Menghubungkan chat aman ke Kios "${storeName}".`);
+        }
+
+        window.bukaModalQty = function(id) {
+            let p = semuaProduk.find(x => x.id === id);
+            if(!p) return;
+            activeCheckoutItem = p;
+            activeQtyBeli = 1;
+            
+            document.getElementById("qty-modal-title").textContent = p.namaBurung;
+            document.getElementById("qty-modal-price").textContent = `Rp ${Number(p.harga).toLocaleString('id-ID')}`;
+            let img = (p.fotoList && p.fotoList[0]) ? p.fotoList[0] : 'https://images.unsplash.com/photo-1552728089-57bdde30beb3';
+            document.getElementById("qty-modal-img").src = img;
+            document.getElementById("input-qty-val").textContent = activeQtyBeli;
+
+            tutupModalProduk();
+            document.getElementById("qty-modal").classList.remove("hidden");
+        }
+
+        window.tutupModalQty = function() {
+            document.getElementById("qty-modal").classList.add("hidden");
+        }
+
+        window.ubahJumlahBeli = function(delta) {
+            activeQtyBeli += delta;
+            if(activeQtyBeli < 1) activeQtyBeli = 1;
+            if(activeQtyBeli > 10) activeQtyBeli = 10;
+            document.getElementById("input-qty-val").textContent = activeQtyBeli;
+        }
+
+        window.konfirmasiBeliLangsung = function() {
+            if(!activeCheckoutItem) return;
+            tutupModalQty();
+            bukaHalamanCheckout([ { ...activeCheckoutItem, qty: activeQtyBeli } ]);
+        }
+
+        window.bukaKategoriMenu = function(kat) {
+            filterKategori(kat);
+            window.scrollTo({top: 300, behavior: 'smooth'});
+        }
+
+        window.tambahKeranjang = function(id) {
+            let p = semuaProduk.find(x => x.id === id);
+            if(!p) return;
+            keranjang.push({ ...p, qty: 1 });
+            alert(`${p.namaBurung} berhasil dimasukkan ke keranjang!`);
+            updateKeranjangUI();
+        }
+
+        function updateKeranjangUI() {
+            let container = document.getElementById("cart-items-container");
+            let btnCheckout = document.getElementById("btn-checkout");
+            if(keranjang.length === 0) { 
+                container.textContent = "Keranjang Anda masih kosong."; 
+                btnCheckout.style.display = "none";
+                return; 
+            }
+            let html = "";
+            let total = 0;
+            keranjang.forEach((i, index) => {
+                total += (i.harga * i.qty);
+                html += `<div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span>${index+1}. ${i.namaBurung} (${i.qty}x)</span> <b>Rp ${(i.harga * i.qty).toLocaleString('id-ID')}</b></div>`;
+            });
+            html += `<hr style="border:0; border-top:1px solid var(--border-color); margin:8px 0;"><b>Total Keranjang: Rp ${total.toLocaleString('id-ID')}</b>`;
+            container.innerHTML = html;
+            btnCheckout.style.display = "block";
+        }
+
+        window.prosesCheckoutKeranjang = function() {
+            if(keranjang.length === 0) return;
+            bukaHalamanCheckout(keranjang);
+        }
+
+        let itemsCheckoutAktif = [];
+        function bukaHalamanCheckout(items) {
+            itemsCheckoutAktif = items;
+            let sellerName = items.length > 0 ? (items[0].penjualName || "Kios Kicau") : "Kios Kicau";
+            let sellerPhone = items.length > 0 ? (items[0].penjualPhone || "082213054013") : "082213054013";
+
+            document.getElementById("summary-seller-name").textContent = sellerName;
+            document.getElementById("summary-seller-phone").textContent = sellerPhone;
+
+            let htmlItems = "";
+            let subtotal = 0;
+            items.forEach(i => {
+                let sub = i.harga * (i.qty || 1);
+                subtotal += sub;
+                htmlItems += `<div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>${i.namaBurung} (${i.qty || 1}x)</span> <b>Rp ${sub.toLocaleString('id-ID')}</b></div>`;
+            });
+
+            document.getElementById("checkout-items-detail").innerHTML = htmlItems;
+            document.getElementById("sum-price").textContent = `Rp ${subtotal.toLocaleString('id-ID')}`;
+            
+            let totalTagihan = subtotal + 10000;
+            document.getElementById("sum-total").textContent = `Rp ${totalTagihan.toLocaleString('id-ID')}`;
+
+            document.getElementById("payment-method-select").value = "Bank Jago";
+            tampilkanInfoPembayaran();
+
+            switchTab('checkout-view');
+        }
+
+        window.tampilkanInfoPembayaran = function() {
+            const method = document.getElementById("payment-method-select").value;
+            const textNomor = document.getElementById("text-nomor-tujuan");
+            
+            if(method === "Bank Jago") textNomor.textContent = "102263644816 (Bank Jago)";
+            else if(method === "Acount Dana") textNomor.textContent = "+6282213054013 (Acount DANA)";
+            else if(method === "Acount Gopay") textNomor.textContent = "+6282213054013 (Acount GoPay)";
+        }
+
+        window.salinNomorPembayaran = function() {
+            const textFull = document.getElementById("text-nomor-tujuan").textContent;
+            const nomorSaja = textFull.split(' ')[0];
+            navigator.clipboard.writeText(nomorSaja).then(() => {
+                alert(`✅ Nomor berhasil disalin: ${nomorSaja}`);
+            });
+        }
+
+        window.eksekusiBayarDanKirimNotif = async function() {
+            if(itemsCheckoutAktif.length === 0) return;
+            
+            let namaPenerima = document.getElementById("buyer-nama-lengkap").value;
+            let hpPenerima = document.getElementById("buyer-whatsapp").value;
+            let alamatPenerima = document.getElementById("buyer-alamat-lengkap").value;
+
+            if(!namaPenerima || !hpPenerima || !alamatPenerima) {
+                alert("Mohon lengkapi Nama, No WhatsApp, dan Alamat Pengiriman Anda!");
+                return;
+            }
+
+            try {
+                alert("Memproses pesanan & menyiapkan notifikasi WhatsApp otomatis...");
+                let itemBarang = itemsCheckoutAktif.map(i => `${i.namaBurung} (${i.qty || 1}x)`).join(", ");
+                let subtotal = itemsCheckoutAktif.reduce((sum, i) => sum + (i.harga * (i.qty || 1)), 0);
+                let totalHarga = subtotal + 10000;
+                let sellerName = itemsCheckoutAktif[0].penjualName || "Kios Kicau";
+                let sellerPhone = itemsCheckoutAktif[0].penjualPhone || "082213054013";
+                let paymentMethod = document.getElementById("payment-method-select").value;
+
+                await addDoc(collection(db, "transactions"), {
+                    items: itemBarang,
+                    total: totalHarga,
+                    adminFee: 10000,
+                    paymentMethod: paymentMethod,
+                    buyerName: namaPenerima,
+                    buyerPhone: hpPenerima,
+                    buyerAddress: alamatPenerima,
+                    sellerName: sellerName,
+                    sellerPhone: sellerPhone,
+                    status: "Menunggu Verifikasi Dana",
+                    noResi: "-",
+                    reviewPhoto: "",
+                    ulasan: "-",
+                    createdAt: new Date()
+                });
+
+                keranjang = [];
+                updateKeranjangUI();
+
+                let cleanSellerPhone = sellerPhone.replace(/^0/, '62');
+                let pesanWaPenjual = `Halo Kios *${sellerName}*,\n\nAda pembeli baru di *Pasar Burung Online Rekber*!\n\n📦 *Detail Pesanan:* ${itemBarang}\n💰 *Total Harga:* Rp ${totalHarga.toLocaleString('id-ID')} (Dana sudah ditransfer & aman di Rekber Pusat).\n\n📍 *Data Alamat Pengiriman Pembeli:*\n- Nama: ${namaPenerima}\n- No HP: ${hpPenerima}\n- Alamat: ${alamatPenerima}\n\nMohon segera siapkan dan kirimkan pesanan ke alamat tersebut. Terima kasih!`;
+                
+                window.open(`https://wa.me/${cleanSellerPhone}?text=${encodeURIComponent(pesanWaPenjual)}`, '_blank');
+
+                switchTab('transaksi-view');
+                bukaStatusTransaksi('Menunggu Verifikasi Dana');
+            } catch(e) {
+                alert("Gagal memproses: " + e.message);
+            }
+        }
+
+        // ==================== FITUR PEMBATALAN PESANAN OLEH PEMBELI (DITAMBAHKAN) ====================
+        window.batalkanPesananPembeli = async function(transId) {
+            let alasanBatal = prompt("Masukkan alasan pembatalan pesanan:");
+            if (alasanBatal === null) return; // Jika dibatalkan
+
+            try {
+                // Membunyikan suara alarm / peringatan saat pembatalan
+                picuNotifikasiAdmin();
+
+                // Ubah status di database firestore menjadi Dibatalkan
+                await updateDoc(doc(db, "transactions", transId), {
+                    status: "Dibatalkan",
+                    alasanBatal: alasanBatal || "Pembeli membatalkan pesanan"
+                });
+
+                alert("Pesanan berhasil dibatalkan. Mengirim notifikasi WhatsApp ke Admin dan Penjual...");
+
+                let t = semuaTransaksi.find(x => x.id === transId);
+                if(t) {
+                    let adminPhone = "6282213054013";
+                    let cleanSellerPhone = (t.sellerPhone || "6282213054013").replace(/^0/, '62');
+                    
+                    let pesanBatal = `⚠️ *PEMBATALAN PESANAN REKBER* ⚠️\n\nPembeli telah **membatalkan** pesanan berikut:\n- Pembeli: ${t.buyerName} (${t.buyerPhone})\n- Barang: ${t.items}\n- Total: Rp ${Number(t.total || 0).toLocaleString('id-ID')}\n- Alasan: "${alasanBatal}"\n\nMohon segera diproses atau kembalikan dana jika sudah ditransfer. Terima kasih.`;
+
+                    // Kirim ke WhatsApp Admin Pusat & Penjual secara otomatis
+                    window.open(`https://wa.me/${adminPhone}?text=${encodeURIComponent(pesanBatal)}`, '_blank');
+                    window.open(`https://wa.me/${cleanSellerPhone}?text=${encodeURIComponent(pesanBatal)}`, '_blank');
+                }
+
+                bukaStatusTransaksi('Dibatalkan');
+            } catch(e) {
+                alert("Gagal membatalkan pesanan: " + e.message);
+            }
+        }
+
+        // ==================== FITUR RESI OLEH PENJUAL ====================
+        window.bukaModalResi = function(transId) {
+            document.getElementById("resi-trans-id").value = transId;
+            document.getElementById("input-no-resi").value = "";
+            document.getElementById("input-foto-resi").value = "";
+            document.getElementById("resi-modal").classList.remove("hidden");
+        }
+
+        window.tutupModalResi = function() {
+            document.getElementById("resi-modal").classList.add("hidden");
+        }
+
+        window.submitResiPenjual = async function() {
+            const transId = document.getElementById("resi-trans-id").value;
+            const noResi = document.getElementById("input-no-resi").value;
+            const fileInput = document.getElementById("input-foto-resi").files[0];
+
+            if(!noResi) {
+                alert("Nomor resi wajib diisi!");
+                return;
+            }
+
+            try {
+                let fotoResiUrl = "";
+                if(fileInput) fotoResiUrl = await bacaFileBase64(fileInput);
+
+                await updateDoc(doc(db, "transactions", transId), {
+                    status: "Sedang Dikirim",
+                    noResi: noResi,
+                    fotoResi: fotoResiUrl
+                });
+
+                tutupModalResi();
+                alert("Resi berhasil disimpan! Aplikasi meneruskan WA ke Admin dan Pembeli.");
+
+                let t = semuaTransaksi.find(x => x.id === transId);
+                if(t) {
+                    let cleanBuyerPhone = (t.buyerPhone || "").replace(/^0/, '62');
+                    let adminPhone = "6282213054013";
+
+                    let pesanWA = `Halo, pesanan *${t.items}* telah dikirim oleh Penjual (*${t.sellerName}*).\n\n📦 *Nomor Resi:* ${noResi}\n\nSilakan cek status pengiriman di aplikasi. Jika barang nanti sudah sampai, mohon segera klik *Pesanan Selesai* dan unggah foto barang asli di aplikasi ya!`;
+
+                    if(cleanBuyerPhone.length > 5) window.open(`https://wa.me/${cleanBuyerPhone}?text=${encodeURIComponent(pesanWA)}`, '_blank');
+                    window.open(`https://wa.me/${adminPhone}?text=${encodeURIComponent("Laporan Resi Masuk:\n- No Resi: " + noResi + "\n- Pembeli: " + t.buyerName + "\n- Status: Sedang Dikirim")}`, '_blank');
+                }
+            } catch(e) {
+                alert("Gagal menyimpan resi: " + e.message);
+            }
+        }
+
+        // ==================== FITUR KONFIRMASI PEMBELI (FOTO + ULASAN) ====================
+        window.bukaModalReview = function(transId) {
+            document.getElementById("review-trans-id").value = transId;
+            document.getElementById("input-foto-diterima").value = "";
+            document.getElementById("input-ulasan-pembeli").value = "";
+            document.getElementById("review-modal").classList.remove("hidden");
+        }
+
+        window.tutupModalReview = function() {
+            document.getElementById("review-modal").classList.add("hidden");
+        }
+
+        window.submitKonfirmasiSelesai = async function() {
+            const transId = document.getElementById("review-trans-id").value;
+            const fileInput = document.getElementById("input-foto-diterima").files[0];
+            const ulasan = document.getElementById("input-ulasan-pembeli").value;
+
+            if(!fileInput) {
+                alert("Wajib melampirkan foto kondisi barang yang diterima untuk keamanan bersama!");
+                return;
+            }
+
+            try {
+                let fotoDiterimaUrl = await bacaFileBase64(fileInput);
+
+                await updateDoc(doc(db, "transactions", transId), {
+                    status: "Pesanan Selesai",
+                    reviewPhoto: fotoDiterimaUrl,
+                    ulasan: ulasan || "Pesanan diterima dengan baik."
+                });
+
+                tutupModalReview();
+                alert("Konfirmasi terkirim! Admin pusat akan segera memverifikasi dan mencairkan dana ke penjual.");
+
+                let t = semuaTransaksi.find(x => x.id === transId);
+                if(t) {
+                    let adminPhone = "6282213054013";
+                    let pesanAdmin = `Notifikasi Selesai dari Pembeli:\n- Pembeli: ${t.buyerName}\n- Penjual: ${t.sellerName}\n- Barang: ${t.items}\n- Ulasan: "${ulasan}"\n\nBarang sudah diterima pembeli. Silakan lakukan pencairan dana ke penjual.`;
+                    window.open(`https://wa.me/${adminPhone}?text=${encodeURIComponent(pesanAdmin)}`, '_blank');
+                }
+            } catch(e) {
+                alert("Gagal mengirim konfirmasi: " + e.message);
+            }
+        }
+
+        window.bukaStatusTransaksi = function(statusFilter) {
+            switchTab('transaksi-view');
+            document.getElementById("transaksi-title-header").textContent = `Status: ${statusFilter}`;
+            let container = document.getElementById("list-transaksi-container");
+
+            let filtered = statusFilter === 'Semua' ? semuaTransaksi : semuaTransaksi.filter(t => t.status.includes(statusFilter));
+
+            if(filtered.length === 0) {
+                container.innerHTML = `<p style="font-size: 12px; color: var(--text-muted); text-align:center;">Tidak ada transaksi dengan status "${statusFilter}".</p>`;
+                return;
+            }
+
+            let html = "";
+            filtered.forEach(t => {
+                let tombolAksiUser = "";
+                let currentUserEmail = auth.currentUser ? auth.currentUser.email : "";
+                
+                // Tombol Batalkan Pesanan khusus jika status masih "Menunggu Verifikasi Dana" atau "Sedang Dikemas"
+                if(t.status === "Menunggu Verifikasi Dana" || t.status === "Sedang Dikemas") {
+                    tombolAksiUser += `<button class="btn-danger" style="margin-top:6px; width:100%;" onclick="batalkanPesananPembeli('${t.id}')">❌ Batalkan Pesanan</button>`;
+                }
+
+                if(auth.currentUser && t.sellerName === currentUserStoreName && (t.status === "Menunggu Verifikasi Dana" || t.status === "Sedang Dikemas")) {
+                    tombolAksiUser += `<button class="btn-primary" style="background:#03ac03; margin-top:6px; width:100%;" onclick="bukaModalResi('${t.id}')">📦 Input Resi Pengiriman</button>`;
+                }
+
+                if(t.status === "Sedang Dikirim") {
+                    tombolAksiUser += `<button class="btn-primary" style="background:#2563eb; margin-top:6px; width:100%;" onclick="bukaModalReview('${t.id}')">✅ Konfirmasi Barang Sampai (Upload Foto & Ulasan)</button>`;
+                }
+
+                let noResiText = t.noResi && t.noResi !== "-" ? `<div style="font-size:11px; color:#2563eb; margin-bottom:2px;"><b>No Resi:</b> ${t.noResi} (Paket sedang di kurir ekspedisi)</div>` : '';
+
+                let alasanBatalText = t.alasanBatal ? `<div style="font-size:11px; color:#dc2626; margin-bottom:2px;"><b>Alasan Batal:</b> ${t.alasanBatal}</div>` : '';
+
+                html += `
+                    <div style="background:var(--bg-body); border:1px solid var(--border-color); padding:10px; border-radius:6px; margin-bottom:10px;">
+                        <div style="font-size:12px; font-weight:bold; margin-bottom:4px;">🛒 ${t.items}</div>
+                        <div style="font-size:11px; color:var(--text-muted); margin-bottom:2px;"><b>Penerima:</b> ${t.buyerName} (${t.buyerPhone})</div>
+                        <div style="font-size:11px; color:var(--text-muted); margin-bottom:2px;"><b>Alamat:</b> ${t.buyerAddress}</div>
+                        <div style="font-size:11px; color:var(--text-muted); margin-bottom:2px;"><b>Kios Penjual:</b> ${t.sellerName}</div>
+                        ${noResiText}
+                        ${alasanBatalText}
+                        <div style="font-size:12px; color:#fa591d; font-weight:bold; margin-bottom:6px;">Total Tagihan: Rp ${Number(t.total).toLocaleString('id-ID')}</div>
+                        <div style="font-size:11px; margin-bottom:4px; font-weight:bold; color:var(--tokped-green);">Status: ${t.status}</div>
+                        ${tombolAksiUser}
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        window.muatPreviewVideo = function(input) {
+            const file = input.files[0];
+            const trimSection = document.getElementById("trim-section");
+            const player = document.getElementById("preview-video-player");
+            
+            if(file) {
+                const MAX_DURATION = 15; 
+                const url = URL.createObjectURL(file);
+                player.src = url;
+                
+                player.onloadedmetadata = () => {
+                    if (player.duration > MAX_DURATION + 0.5) {
+                        alert(`❌ Durasi video terlalu panjang (${Math.round(player.duration)} detik).\nMaksimal durasi video adalah ${MAX_DURATION} detik!`);
+                        input.value = "";
+                        player.src = "";
+                        trimSection.classList.add("hidden");
+                        return;
+                    }
+                    trimSection.classList.remove("hidden");
+                    document.getElementById("trim-start").value = 0;
+                    document.getElementById("trim-end").value = player.duration > 15 ? 15 : player.duration;
+                };
+            }
+        }
+
+        window.ujiRentangTrim = function() {
+            const player = document.getElementById("preview-video-player");
+            const start = parseFloat(document.getElementById("trim-start").value) || 0;
+            const end = parseFloat(document.getElementById("trim-end").value) || 15;
+
+            player.currentTime = start;
+            player.play();
+
+            const checkTime = () => {
+                if(player.currentTime >= end) {
+                    player.pause();
+                    player.removeEventListener('timeupdate', checkTime);
+                }
+            };
+            player.addEventListener('timeupdate', checkTime);
+        }
+
+        window.publikasikanVideo = async function() {
+            const fileInput = document.getElementById("video-file-input");
+            const caption = document.getElementById("video-caption-input").value;
+
+            if(!fileInput.files[0]) {
+                alert("Pilih file video terlebih dahulu!");
+                return;
+            }
+
+            try {
+                alert("Mengunggah video asli ke feed...");
+                let videoUrl = await bacaFileBase64(fileInput.files[0]);
+                let uploaderName = auth.currentUser ? auth.currentUser.email : "guest@market.com";
+
+                await addDoc(collection(db, "feed_videos"), {
+                    videoUrl: videoUrl,
+                    caption: caption,
+                    uploader: uploaderName,
+                    likes: 0,
+                    createdAt: new Date()
+                });
+
+                alert("Video pendek berhasil dipublikasikan di Feed!");
+                document.getElementById("video-caption-input").value = "";
+                document.getElementById("video-file-input").value = "";
+                document.getElementById("trim-section").classList.add("hidden");
+                loadFeedVideo();
+                switchTab('feed-view');
+            } catch(e) {
+                alert("Gagal mengunggah video: " + e.message);
+            }
+        }
+
+        window.loadFeedVideo = async function() {
+            const container = document.getElementById("feed-videos-container");
+            try {
+                const qs = await getDocs(collection(db, "feed_videos"));
+                semuaVideo = [];
+                qs.forEach(d => semuaVideo.push({ id: d.id, ...d.data() }));
+
+                if(semuaVideo.length === 0) {
+                    container.innerHTML = "<p style='font-size: 12px; color: var(--text-muted); text-align: center;'>Belum ada video di feed.</p>";
+                    return;
+                }
+
+                let html = "";
+                semuaVideo.forEach(v => {
+                    html += `
+                        <div class="video-card">
+                            <div class="video-header">
+                                <div class="video-user-avatar" style="display:flex; align-items:center; justify-content:center; background:#03ac03; color:white; font-weight:bold;">${v.uploader ? v.uploader[0].toUpperCase() : 'U'}</div>
+                                <div class="video-username">${v.uploader || 'Pengguna'}</div>
+                            </div>
+                            <video src="${v.videoUrl}" class="video-player" controls preload="metadata"></video>
+                            <div class="video-footer">
+                                <div class="video-caption" style="white-space: pre-line;">${v.caption || ''}</div>
+                                <div class="video-actions">
+                                    <button class="video-action-btn" onclick="sukaVideo('${v.id}')">❤️ <span id="like-count-${v.id}">${v.likes || 0}</span> Suka</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            } catch(e) {
+                container.innerHTML = "<p style='font-size: 12px; color: var(--text-muted); text-align: center;'>Gagal memuat video.</p>";
+            }
+        }
+
+        window.sukaVideo = async function(id) {
+            let v = semuaVideo.find(x => x.id === id);
+            if(!v) return;
+            v.likes = (v.likes || 0) + 1;
+            document.getElementById(`like-count-${id}`).textContent = v.likes;
+            try {
+                await updateDoc(doc(db, "feed_videos", id), { likes: v.likes });
+            } catch(e) { console.error(e); }
+        }
+
+        window.filterProduk = function() {
+            let kw = document.getElementById("search-input").value.toLowerCase();
+            renderProduk(semuaProduk.filter(p => p.namaBurung.toLowerCase().includes(kw)));
+        }
+
+        window.filterKategori = function(kat) {
+            document.querySelectorAll('.cat-item').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.cat-item').forEach(el => {
+                if(el.textContent.includes(kat)) el.classList.add('active');
+            });
+            
+            if(kat === 'Semua') renderProduk(semuaProduk);
+            else renderProduk(semuaProduk.filter(p => p.kategori && p.kategori.toLowerCase().includes(kat.toLowerCase())));
+        }
+    </script>
+</body>
+</html>
