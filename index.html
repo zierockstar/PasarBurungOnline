@@ -818,7 +818,6 @@
                             document.getElementById("preview-profile-img").src = sData.profileImg;
                         }
 
-                        // Isi form setelan profil toko
                         document.getElementById("setting-store-name").value = sData.storeName || "";
                         document.getElementById("setting-store-address").value = sData.address || "";
                         document.getElementById("setting-store-phone").value = sData.phone || "";
@@ -830,10 +829,25 @@
                 authBox.classList.remove("hidden");
                 dashboardBox.classList.add("hidden");
                 currentUserStoreName = "Kicau Mania";
+                sellerDocIdGlobal = null;
+                
+                document.getElementById("user-display-email").textContent = "-";
+                document.getElementById("profile-storename-display").textContent = "-";
+                document.getElementById("profile-display-address").textContent = "-";
+                document.getElementById("profile-display-phone").textContent = "-";
+                document.getElementById("profile-display-location").textContent = "-";
+                document.getElementById("profile-display-img").src = "https://images.unsplash.com/photo-1552728089-57bdde30beb3";
+                
+                document.getElementById("reg-email").value = "";
+                document.getElementById("reg-password").value = "";
+                document.getElementById("reg-phone").value = "";
+                document.getElementById("reg-storename").value = "";
+                document.getElementById("reg-address").value = "";
+                
+                loadBarangPenjual();
             }
         });
 
-        // FUNGSI SIMPAN SETELAN PROFIL TOKO (FOTO, NAMA, ALAMAT, TELEPON, LOKASI)
         window.simpanPengaturanProfilToko = async function() {
             if(!auth.currentUser) {
                 alert("Silakan login terlebih dahulu sebagai penjual.");
@@ -870,7 +884,8 @@
 
                 await updateDoc(doc(db, "sellers", sellerDocIdGlobal), updatePayload);
                 alert("Pengaturan profil toko berhasil diperbarui!");
-                location.reload();
+                loadKatalog();
+                loadBarangPenjual();
             } catch(e) {
                 alert("Gagal memperbarui profil: " + e.message);
             }
@@ -909,7 +924,13 @@
             if(email && password) signInWithEmailAndPassword(auth, email, password).catch(e => alert(e.message));
         });
 
-        document.getElementById("btn-logout").addEventListener("click", () => signOut(auth));
+        document.getElementById("btn-logout").addEventListener("click", () => {
+            signOut(auth).then(() => {
+                alert("Berhasil keluar (logout). Data sesi login telah dihapus.");
+            }).catch((e) => {
+                alert("Gagal logout: " + e.message);
+            });
+        });
 
         function bacaFileBase64(file) {
             return new Promise((resolve, reject) => {
@@ -943,17 +964,26 @@
                 if(foundS) sellerPhoneData = foundS.phone;
 
                 if(editId) {
+                    let p = semuaProduk.find(x => x.id === editId);
+                    if (!auth.currentUser || p.penjualEmail !== auth.currentUser.email) {
+                        alert("Akses ditolak! Anda hanya dapat mengubah produk yang Anda posting sendiri.");
+                        return;
+                    }
                     let updateData = { namaBurung: name, harga: Number(price), kategori: category, deskripsi: desc };
                     if(fotoList.length > 0) updateData.fotoList = fotoList;
                     await updateDoc(doc(db, "products", editId), updateData);
                     alert("Produk berhasil diperbarui!");
                 } else {
+                    if(!auth.currentUser) {
+                        alert("Silakan login terlebih dahulu untuk memposting produk.");
+                        return;
+                    }
                     if(fotoList.length === 0) {
                         fotoList.push('https://images.unsplash.com/photo-1552728089-57bdde30beb3');
                     }
                     await addDoc(collection(db, "products"), {
                         namaBurung: name, harga: Number(price), kategori: category, deskripsi: desc, fotoList: fotoList,
-                        penjualEmail: auth.currentUser ? auth.currentUser.email : "guest@market.com",
+                        penjualEmail: auth.currentUser.email,
                         penjualName: currentUserStoreName,
                         penjualPhone: sellerPhoneData,
                         createdAt: new Date()
@@ -984,6 +1014,10 @@
         window.editProduk = function(id) {
             let p = semuaProduk.find(x => x.id === id);
             if(!p) return;
+            if(!auth.currentUser || p.penjualEmail !== auth.currentUser.email) {
+                alert("Akses ditolak! Produk ini hanya bisa diubah oleh si pemosting.");
+                return;
+            }
             document.getElementById("edit-product-id").value = p.id;
             document.getElementById("bird-name").value = p.namaBurung;
             document.getElementById("bird-price").value = p.harga;
@@ -996,6 +1030,12 @@
         }
 
         window.hapusProduk = async function(id) {
+            let p = semuaProduk.find(x => x.id === id);
+            if(!p) return;
+            if(!auth.currentUser || p.penjualEmail !== auth.currentUser.email) {
+                alert("Akses ditolak! Produk ini hanya bisa dihapus oleh si pemosting.");
+                return;
+            }
             if(!confirm("Yakin ingin menghapus produk ini dari kios?")) return;
             try {
                 await deleteDoc(doc(db, "products", id));
@@ -1625,7 +1665,7 @@
                 if(el.textContent.includes(kat)) el.classList.add('active');
             });
             
-            if(kat === 'Semua') renderProduk(semuaProduk);
+            if(cat === 'Semua') renderProduk(semuaProduk);
             else renderProduk(semuaProduk.filter(p => p.kategori && p.kategori.toLowerCase().includes(kat.toLowerCase())));
         }
     </script>
