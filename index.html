@@ -55,9 +55,9 @@
             font-size: 12px;
         }
 
-        .menu-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; background: var(--card-bg); padding: 12px; border-radius: 12px; margin-bottom: 10px; text-align: center; }
-        .menu-icon-item { font-size: 10px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-main); position: relative; }
-        .menu-icon-circle { width: 38px; height: 38px; background: #e8f5e9; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+        .menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; background: var(--card-bg); padding: 12px; border-radius: 12px; margin-bottom: 10px; text-align: center; }
+        .menu-icon-item { font-size: 11px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-main); position: relative; }
+        .menu-icon-circle { width: 42px; height: 42px; background: #e8f5e9; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
 
         .category-scroll { display: flex; gap: 8px; overflow-x: auto; padding: 10px 15px; scrollbar-width: none; background: var(--card-bg); margin-bottom: 10px; border-radius: 8px; }
         .category-scroll::-webkit-scrollbar { display: none; }
@@ -205,7 +205,7 @@
                 <input type="text" id="input-foto-diterima" placeholder="https://example.com/foto-diterima.jpg" style="background: white; padding: 8px; margin-bottom: 10px;">
                 
                 <div style="font-size: 12px; margin-bottom: 4px; font-weight: bold;">Ulasan / Komentar Anda:</div>
-                <textarea id="input-ulasan-pembeli" rows="3" placeholder="Burung sehat, packing aman, mantap!"></textarea>
+                <textarea id="input-ulasan-pembeli" rows="3" placeholder="Produk bagus, packing aman, mantap!"></textarea>
                 
                 <button class="btn-primary" style="background: #2563eb; margin-top: 6px;" onclick="submitKonfirmasiSelesai()">Kirim Konfirmasi ke Admin</button>
             </div>
@@ -257,7 +257,7 @@
         <div class="top-bar">
             <div class="search-container">
                 <span>🔍</span>
-                <input type="text" id="search-input" placeholder="Cari Murai Batu, Kenari, Pakan, Vitamin, Obat..." onkeyup="filterProduk()">
+                <input type="text" id="search-input" placeholder="Cari Burung, Pakan, Vitamin, Obat..." onkeyup="filterProduk()">
             </div>
             <div class="header-icons">
                 <span onclick="bukaPanelAdmin()" title="Panel Khusus Admin Rekber" style="font-size: 16px; background: #e8f5e9; padding: 6px 10px; border-radius: 20px; border: 1px solid #c8e6c9;">🛡️ Admin</span>
@@ -270,53 +270,49 @@
 
         <div id="home-view" class="section-view active-view">
             <div class="banner-rekber">
-                <h2>🛡️ Khusus Rekber Transaksi Burung & Perlengkapan</h2>
-                <p>Dana aman ditahan admin pusat sampai burung, pakan, vitamin, atau obat diterima dengan baik.</p>
+                <h2>🛡️ Khusus Rekber Burung, Pakan, Vitamin & Obat</h2>
+                <p>Dana aman ditahan admin pusat sampai produk diterima dengan baik oleh pembeli.</p>
             </div>
 
             <div class="running-text-box">
                 <marquee scrollamount="5">
-                    <span class="rgb-marquee">✨ Aplikasi ini ditanggung jawab penuh oleh Lea Kejora / DF Canary Bird ✨</span>
+                    <span class="rgb-marquee">✨ Pusat Burung, Pakan, Vitamin & Obat Terpercaya via Rekber Lea Kejora / DF Canary Bird ✨</span>
                 </marquee>
             </div>
 
-            <!-- MENU GRID DIPERBARUI DENGAN TAMBAHAN MENU OBAT -->
-            <div class="menu-grid">
+            <div class="menu-grid" style="grid-template-columns: repeat(5, 1fr);">
                 <div class="menu-icon-item" onclick="bukaStatusTransaksi('Semua')">
                     <div class="menu-icon-circle">📋</div>
                     <span>Transaksi</span>
                     <span id="badge-menu-transaksi" class="badge-dot">0</span>
                 </div>
-                <div class="menu-icon-item" onclick="bukaKategoriMenu('Pakan')">
+                <div class="menu-icon-item" onclick="bukaKategoriMenu('Burung')">
+                    <div class="menu-icon-circle">🐦</div>
+                    <span>Burung</span>
+                </div>
+                <div class="menu-icon-item" onclick="bukaKategoriMenu('Pakan Burung')">
                     <div class="menu-icon-circle">🌾</div>
                     <span>Pakan</span>
                 </div>
-                <div class="menu-icon-item" onclick="bukaKategoriMenu('Vitamin')">
+                <div class="menu-icon-item" onclick="bukaKategoriMenu('Vitamin Burung')">
                     <div class="menu-icon-circle">🧪</div>
                     <span>Vitamin</span>
                 </div>
-                <div class="menu-icon-item" onclick="bukaKategoriMenu('Obat')">
+                <div class="menu-icon-item" onclick="bukaKategoriMenu('Obat Burung')">
                     <div class="menu-icon-circle">💊</div>
                     <span>Obat</span>
                 </div>
-                <div class="menu-icon-item" onclick="bukaKategoriMenu('Sangkar')">
-                    <div class="menu-icon-circle">🏠</div>
-                    <span>Sangkar</span>
-                </div>
             </div>
 
-            <!-- KATEGORI SCROLL DIPERBARUI -->
             <div class="category-scroll">
                 <div class="cat-item active" onclick="filterKategori('Semua')">Semua Barang</div>
-                <div class="cat-item" onclick="filterKategori('Murai Batu')">Murai Batu</div>
-                <div class="cat-item" onclick="filterKategori('Kenari')">Kenari</div>
-                <div class="cat-item" onclick="filterKategori('Pakan')">Pakan & Kroto</div>
-                <div class="cat-item" onclick="filterKategori('Vitamin')">Vitamin & Doping</div>
-                <div class="cat-item" onclick="filterKategori('Obat')">Obat Burung</div>
-                <div class="cat-item" onclick="filterKategori('Sangkar')">Sangkar</div>
+                <div class="cat-item" onclick="filterKategori('Burung')">Burung</div>
+                <div class="cat-item" onclick="filterKategori('Pakan Burung')">Pakan Burung</div>
+                <div class="cat-item" onclick="filterKategori('Vitamin Burung')">Vitamin Burung</div>
+                <div class="cat-item" onclick="filterKategori('Obat Burung')">Obat Burung</div>
             </div>
 
-            <div style="font-size: 14px; font-weight: bold; margin: 12px 0 8px 0;">Rekomendasi Pilihan Profesional</div>
+            <div style="font-size: 14px; font-weight: bold; margin: 12px 0 8px 0;">Rekomendasi Burung, Pakan, Vitamin & Obat Pilihan</div>
             <div class="product-grid" id="live-product-list">
                 <p style="color: var(--text-muted); font-size: 12px;">Memuat produk...</p>
             </div>
@@ -324,7 +320,7 @@
 
         <div id="feed-view" class="section-view">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <div style="font-size: 16px; font-weight: bold;">🎬 Feed Video Real Kicau Mania</div>
+                <div style="font-size: 16px; font-weight: bold;">🎬 Feed Video Burung, Pakan, Vitamin & Obat</div>
                 <button class="btn-primary" style="width: auto; padding: 6px 12px; font-size: 11px;" onclick="switchTab('upload-video-view')">+ Upload Video</button>
             </div>
             
@@ -342,10 +338,10 @@
             <div class="card">
                 <div style="margin: 6px 0;">
                     <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;"><b>Masukkan Link Video (URL):</b></label>
-                    <input type="text" id="video-url-input" placeholder="https://example.com/video-burung.mp4" style="background: white; padding: 8px; margin-bottom: 10px;">
+                    <input type="text" id="video-url-input" placeholder="https://example.com/video-produk.mp4" style="background: white; padding: 8px; margin-bottom: 10px;">
                 </div>
 
-                <textarea id="video-caption-input" rows="3" placeholder="Tulis caption & sebutkan nama burung sesuai katalog..."></textarea>
+                <textarea id="video-caption-input" rows="3" placeholder="Tulis caption seputar burung, pakan, vitamin, atau obat..."></textarea>
                 <button class="btn-primary" style="margin-top: 8px;" onclick="publikasikanVideoViaLink()">Kirim & Publikasikan Video</button>
             </div>
         </div>
@@ -454,11 +450,11 @@
 
             <!-- FORM INPUT PRODUK MENGGUNAKAN LINK FOTO -->
             <div class="card">
-                <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px;" id="form-product-title-label">Posting Burung / Barang Baru (Via Link Foto)</div>
+                <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px;" id="form-product-title-label">Posting Burung, Pakan, Vitamin / Obat Baru (Via Link Foto)</div>
                 <input type="hidden" id="edit-product-id" value="">
-                <input type="text" id="bird-name" placeholder="Nama Produk (Contoh: Pakan Voer Kasar / Vitamin Ebod / Obat Serak)">
-                <input type="number" id="bird-price" placeholder="Harga (Contoh: 50000)">
-                <input type="text" id="bird-category" placeholder="Kategori (Murai Batu / Kenari / Pakan / Vitamin / Obat / Sangkar)">
+                <input type="text" id="bird-name" placeholder="Nama Produk (Contoh: Murai Batu Gacor / Pakan Voer / Vitamin Vitagrow)">
+                <input type="number" id="bird-price" placeholder="Harga (Contoh: 75000)">
+                <input type="text" id="bird-category" placeholder="Kategori (Burung / Pakan Burung / Vitamin Burung / Obat Burung)">
                 
                 <div style="margin: 8px 0; background: var(--bg-body); padding: 8px; border-radius: 6px; border: 1px solid var(--border-color);">
                     <label style="font-size: 11px; color: var(--text-main); display: block; margin-bottom: 4px;"><b>Masukkan Link 1 sampai 3 Foto Produk:</b></label>
@@ -467,13 +463,13 @@
                     <input type="text" id="bird-img-3" placeholder="Link Foto 3 (Opsional): https://..." style="background: white; padding: 6px;">
                 </div>
 
-                <textarea id="bird-desc" rows="4" placeholder="Deskripsi lengkap (Contoh: Vitamin khusus penggacor burung, kandungan herbal alami aman tanpa efek samping)"></textarea>
+                <textarea id="bird-desc" rows="4" placeholder="Deskripsi lengkap (Contoh: Jenis kelamin, usia, prestasi, atau khasiat untuk burung)"></textarea>
                 <button class="btn-primary" style="margin-top: 8px;" id="btn-submit-product" onclick="simpanProduk()">Publikasikan Produk</button>
                 <button class="btn-outline" style="width:100%; margin-top:6px; display:none;" id="btn-cancel-edit" onclick="resetFormProduk()">Batal Edit</button>
             </div>
 
             <div class="card">
-                <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px;">Daftar Barang di Kios Anda (Edit / Hapus)</div>
+                <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px;">Daftar Burung, Pakan, Vitamin & Obat di Kios Anda (Edit / Hapus)</div>
                 <div id="seller-product-list">
                     <p style="font-size: 12px; color: var(--text-muted);">Memuat barang kios...</p>
                 </div>
@@ -557,7 +553,7 @@
         let semuaTransaksi = [];
         let semuaPenjual = [];
         let sellerDocIdGlobal = null;
-        let currentUserStoreName = "Kios Kicau Mania";
+        let currentUserStoreName = "Kios Pakan & Vitamin";
 
         let activeCheckoutItem = null;
         let activeQtyBeli = 1;
@@ -842,7 +838,7 @@
                             uid: user.uid,
                             email: user.email,
                             storeName: "DF Canary Bird",
-                            address: "Kios Pasar Burung Online",
+                            address: "Kios Pakan & Vitamin",
                             phone: "082213054013",
                             location: "Indonesia",
                             profileImg: "https://images.unsplash.com/photo-1552728089-57bdde30beb3"
@@ -850,7 +846,7 @@
                         await setDoc(newSellerRef, sData);
                     }
 
-                    currentUserStoreName = sData.storeName || "Kios Kicau Mania";
+                    currentUserStoreName = sData.storeName || "Kios Pakan & Vitamin";
                     
                     document.getElementById("profile-storename-display").textContent = currentUserStoreName;
                     document.getElementById("profile-display-address").textContent = sData.address || "-";
@@ -872,7 +868,7 @@
             } else {
                 authBox.classList.remove("hidden");
                 dashboardBox.classList.add("hidden");
-                currentUserStoreName = "Kicau Mania";
+                currentUserStoreName = "Kios Pakan & Vitamin";
                 sellerDocIdGlobal = null;
                 
                 document.getElementById("user-display-email").textContent = "-";
@@ -988,7 +984,7 @@
             const editId = document.getElementById("edit-product-id").value;
             const name = document.getElementById("bird-name").value;
             const price = document.getElementById("bird-price").value;
-            const category = document.getElementById("bird-category").value || "Umum";
+            const category = document.getElementById("bird-category").value || "Burung";
             const desc = document.getElementById("bird-desc").value;
             
             const link1 = document.getElementById("bird-img-1").value.trim();
@@ -1049,7 +1045,7 @@
             document.getElementById("bird-img-1").value = "";
             document.getElementById("bird-img-2").value = "";
             document.getElementById("bird-img-3").value = "";
-            document.getElementById("form-product-title-label").textContent = "Posting Burung / Barang Baru (Via Link Foto)";
+            document.getElementById("form-product-title-label").textContent = "Posting Burung, Pakan, Vitamin / Obat Baru (Via Link Foto)";
             document.getElementById("btn-submit-product").textContent = "Publikasikan Produk";
             document.getElementById("btn-cancel-edit").style.display = "none";
         }
@@ -1137,47 +1133,10 @@
                     let data = d.data();
                     if(!data.fotoList && data.foto) data.fotoList = [data.foto];
                     else if(!data.fotoList) data.fotoList = ['https://images.unsplash.com/photo-1552728089-57bdde30beb3'];
-                    if(!data.penjualName) data.penjualName = "Kios Kicau Mania";
+                    if(!data.penjualName) data.penjualName = "Kios Pakan & Vitamin";
                     if(!data.penjualPhone) data.penjualPhone = "082213054013";
                     semuaProduk.push({ id: d.id, ...data });
                 });
-
-                // TAMBAHAN DATA DEFAULT OTOMATIS: Pakan, Vitamin, & Obat Burung jika katalog masih kosong
-                if(semuaProduk.length === 0) {
-                    semuaProduk = [
-                        {
-                            id: 'default-pakan-1',
-                            namaBurung: 'Pakan Voer Kasar Premium Murai & Kacer',
-                            harga: 45000,
-                            kategori: 'Pakan',
-                            deskripsi: 'Pakan harian berkualitas tinggi kaya protein, minyak ikan, dan ekstrak buah untuk mendongkrak stamina serta kicauan burung.',
-                            fotoList: ['https://images.unsplash.com/photo-1589927986089-35812389d1f3'],
-                            penjualName: 'DF Canary Bird Pusat',
-                            penjualPhone: '082213054013'
-                        },
-                        {
-                            id: 'default-vitamin-1',
-                            namaBurung: 'Vitamin Penggacor Seketika (Supervit)',
-                            harga: 35000,
-                            kategori: 'Vitamin',
-                            deskripsi: 'Vitamin cair tetes untuk mengatasi burung macet bunyi, menambah mental tarung di lapangan, dan memperjernih volume suara.',
-                            fotoList: ['https://images.unsplash.com/photo-1584308666744-24d5c474f2ae'],
-                            penjualName: 'DF Canary Bird Pusat',
-                            penjualPhone: '082213054013'
-                        },
-                        {
-                            id: 'default-obat-1',
-                            namaBurung: 'Obat Tetes Ampuh Sembuhkan Serak & Flu Burung',
-                            harga: 40000,
-                            kategori: 'Obat',
-                            deskripsi: 'Obat khusus burung sesak napas, serak akibat cuaca, ngorok, dan lesu. Aman dan terbukti ampuh menyembuhkan dalam 3 hari.',
-                            fotoList: ['https://images.unsplash.com/photo-1550572017-edd951b55104'],
-                            penjualName: 'DF Canary Bird Pusat',
-                            penjualPhone: '082213054013'
-                        }
-                    ];
-                }
-
                 filterKategori(kategoriAktif);
                 if(auth.currentUser) loadBarangPenjual();
             } catch(e) { console.error(e); }
@@ -1274,7 +1233,7 @@
                 </div>
                 <div style="font-size:16px; font-weight:bold; margin-bottom:4px;">${p.namaBurung}</div>
                 <div style="font-size:15px; color:#fa591d; font-weight:bold; margin-bottom:4px;">Rp ${Number(p.harga).toLocaleString('id-ID')}</div>
-                <div style="font-size:11px; color:var(--tokped-green); font-weight:bold; margin-bottom:2px;">Kios: ${p.penjualName || 'Kios Kicau'}</div>
+                <div style="font-size:11px; color:var(--tokped-green); font-weight:bold; margin-bottom:2px;">Kios: ${p.penjualName || 'Kios Pakan'}</div>
                 <div style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">Kategori: ${p.kategori || 'Umum'}</div>
                 <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px; font-weight:bold;">Deskripsi:</div>
                 <div style="font-size:12px; color:var(--text-main); line-height:1.4; margin-bottom:10px; background:var(--bg-body); padding:8px; border-radius:6px; white-space: pre-line;">${p.deskripsi || 'Tidak ada deskripsi.'}</div>
@@ -1373,7 +1332,7 @@
         let itemsCheckoutAktif = [];
         function bukaHalamanCheckout(items) {
             itemsCheckoutAktif = items;
-            let sellerName = items.length > 0 ? (items[0].penjualName || "Kios Kicau") : "Kios Kicau";
+            let sellerName = items.length > 0 ? (items[0].penjualName || "Kios Pakan") : "Kios Pakan";
             let sellerPhone = items.length > 0 ? (items[0].penjualPhone || "082213054013") : "082213054013";
 
             document.getElementById("summary-seller-name").textContent = sellerName;
@@ -1434,7 +1393,7 @@
                 let itemBarang = itemsCheckoutAktif.map(i => `${i.namaBurung} (${i.qty || 1}x)`).join(", ");
                 let subtotal = itemsCheckoutAktif.reduce((sum, i) => sum + (i.harga * (i.qty || 1)), 0);
                 let totalHarga = subtotal + 10000;
-                let sellerName = itemsCheckoutAktif[0].penjualName || "Kios Kicau";
+                let sellerName = itemsCheckoutAktif[0].penjualName || "Kios Pakan";
                 let sellerPhone = itemsCheckoutAktif[0].penjualPhone || "082213054013";
                 let paymentMethod = document.getElementById("payment-method-select").value;
 
