@@ -809,7 +809,6 @@
                         sellerDocIdGlobal = qs.docs[0].id;
                         sData = qs.docs[0].data();
                     } else {
-                        // Perbaikan Error: Auto-create dokumen toko_utama / profil penjual jika belum ada
                         const newSellerRef = doc(collection(db, "sellers"));
                         sellerDocIdGlobal = newSellerRef.id;
                         sData = {
@@ -891,7 +890,7 @@
                     storeName: storeName,
                     address: address,
                     phone: phone,
-                    location: location
+                    location: location || "Indonesia"
                 };
 
                 if(fileImg) {
@@ -900,7 +899,7 @@
                 }
 
                 await setDoc(doc(db, "sellers", sellerDocIdGlobal), updatePayload, { merge: true });
-                alert("Pengaturan profil toko berhasil diperbarui!");
+                alert("Pengaturan profil toko & lokasi berhasil diperbarui!");
                 location.reload();
             } catch(e) {
                 alert("Gagal memperbarui profil: " + e.message);
