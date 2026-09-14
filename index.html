@@ -524,7 +524,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, updateDoc, deleteDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDfQXHDI8PFBbq5_bOWEmzg40RIrM1egJk",
@@ -803,26 +803,43 @@
                 try {
                     const q = query(collection(db, "sellers"), where("uid", "==", user.uid));
                     const qs = await getDocs(q);
+                    
+                    let sData;
                     if (!qs.empty) {
                         sellerDocIdGlobal = qs.docs[0].id;
-                        let sData = qs.docs[0].data();
-                        currentUserStoreName = sData.storeName || "Kios Kicau";
-                        
-                        document.getElementById("profile-storename-display").textContent = currentUserStoreName;
-                        document.getElementById("profile-display-address").textContent = sData.address || "-";
-                        document.getElementById("profile-display-phone").textContent = sData.phone || "-";
-                        document.getElementById("profile-display-location").textContent = sData.location || "-";
-                        
-                        if(sData.profileImg) {
-                            document.getElementById("profile-display-img").src = sData.profileImg;
-                            document.getElementById("preview-profile-img").src = sData.profileImg;
-                        }
-
-                        document.getElementById("setting-store-name").value = sData.storeName || "";
-                        document.getElementById("setting-store-address").value = sData.address || "";
-                        document.getElementById("setting-store-phone").value = sData.phone || "";
-                        document.getElementById("setting-store-location").value = sData.location || "";
+                        sData = qs.docs[0].data();
+                    } else {
+                        // Perbaikan Error: Auto-create dokumen toko_utama / profil penjual jika belum ada
+                        const newSellerRef = doc(collection(db, "sellers"));
+                        sellerDocIdGlobal = newSellerRef.id;
+                        sData = {
+                            uid: user.uid,
+                            email: user.email,
+                            storeName: "DF Canary Bird",
+                            address: "Kios Pasar Burung Online",
+                            phone: "082213054013",
+                            location: "Indonesia",
+                            profileImg: "https://images.unsplash.com/photo-1552728089-57bdde30beb3"
+                        };
+                        await setDoc(newSellerRef, sData);
                     }
+
+                    currentUserStoreName = sData.storeName || "Kios Kicau Mania";
+                    
+                    document.getElementById("profile-storename-display").textContent = currentUserStoreName;
+                    document.getElementById("profile-display-address").textContent = sData.address || "-";
+                    document.getElementById("profile-display-phone").textContent = sData.phone || "-";
+                    document.getElementById("profile-display-location").textContent = sData.location || "-";
+                    
+                    if(sData.profileImg) {
+                        document.getElementById("profile-display-img").src = sData.profileImg;
+                        document.getElementById("preview-profile-img").src = sData.profileImg;
+                    }
+
+                    document.getElementById("setting-store-name").value = sData.storeName || "";
+                    document.getElementById("setting-store-address").value = sData.address || "";
+                    document.getElementById("setting-store-phone").value = sData.phone || "";
+                    document.getElementById("setting-store-location").value = sData.location || "";
                 } catch(e) { console.error(e); }
                 loadBarangPenjual();
             } else {
@@ -882,10 +899,9 @@
                     updatePayload.profileImg = profileImgBase64;
                 }
 
-                await updateDoc(doc(db, "sellers", sellerDocIdGlobal), updatePayload);
+                await setDoc(doc(db, "sellers", sellerDocIdGlobal), updatePayload, { merge: true });
                 alert("Pengaturan profil toko berhasil diperbarui!");
-                loadKatalog();
-                loadBarangPenjual();
+                location.reload();
             } catch(e) {
                 alert("Gagal memperbarui profil: " + e.message);
             }
@@ -1665,7 +1681,7 @@
                 if(el.textContent.includes(kat)) el.classList.add('active');
             });
             
-            if(cat === 'Semua') renderProduk(semuaProduk);
+            if(kat === 'Semua') renderProduk(semuaProduk);
             else renderProduk(semuaProduk.filter(p => p.kategori && p.kategori.toLowerCase().includes(kat.toLowerCase())));
         }
     </script>
