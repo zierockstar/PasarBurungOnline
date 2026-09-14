@@ -462,7 +462,7 @@
                     <input type="text" id="bird-img-3" placeholder="Link Foto 3 (Opsional): https://..." style="background: white; padding: 6px;">
                 </div>
 
-                <textarea id="bird-desc" rows="4" placeholder="Deskripsi lengkap (Contoh: Jenis kelamin, usia, prestasi, atau khasiat untuk burung)"></textarea>
+                <textarea id="bird-desc" rows="4" placeholder="Deskripsi lengkap (Contoh: Jenis kelamin, usia, prestasi, atau khasiat untuk burung. Anda juga bisa menyisipkan Link Shopee di sini)"></textarea>
                 <button class="btn-primary" style="margin-top: 8px;" id="btn-submit-product" onclick="simpanProduk()">Publikasikan Produk</button>
                 <button class="btn-outline" style="width:100%; margin-top:6px; display:none;" id="btn-cancel-edit" onclick="resetFormProduk()">Batal Edit</button>
             </div>
@@ -1161,6 +1161,14 @@
             renderProduk(filtered);
         }
 
+        // FUNGSI PENDETEKSI LINK SHOPEE UNTUK TOMBOL AFILIASI
+        function extractShopeeLink(text) {
+            if (!text) return null;
+            const shopeeRegex = /(https?:\/\/(?:s\.shopee\.co\.id|shopee\.co\.id)[^\s]+)/g;
+            const match = text.match(shopeeRegex);
+            return match ? match[0] : null;
+        }
+
         window.renderProduk = function(data) {
             let html = "";
             data.forEach((p) => {
@@ -1183,6 +1191,18 @@
 
                 let deskripsiSingkat = p.deskripsi || 'Tidak ada deskripsi.';
                 
+                // Cek apakah ada link shopee di deskripsi untuk ditampilkan tombol klik pembelian di card utama
+                const shopeeLink = extractShopeeLink(p.deskripsi);
+                let htmlTombolShopeeCard = '';
+                if (shopeeLink) {
+                    htmlTombolShopeeCard = `
+                        <a href="${shopeeLink}" target="_blank" rel="noopener noreferrer" 
+                           style="display: block; text-align: center; background-color: #ee4d2d; color: white; padding: 6px; border-radius: 4px; font-weight: bold; text-decoration: none; font-size: 11px; margin-top: 4px;">
+                            🛒 Klik Beli di Shopee
+                        </a>
+                    `;
+                }
+
                 html += `
                     <div class="product-card">
                         <div class="product-img-slider" id="slider-${cardId}">
@@ -1194,6 +1214,7 @@
                             <div class="product-title" onclick="bukaDetailProduk('${p.id}')">${p.namaBurung}</div>
                             <div class="product-price">Rp ${Number(p.harga).toLocaleString('id-ID')}</div>
                             <div class="product-desc">${deskripsiSingkat}</div>
+                            ${htmlTombolShopeeCard}
                             <button class="btn-primary" style="margin-top:6px; padding:6px;" onclick="bukaDetailProduk('${p.id}')">Lihat Detail & Beli</button>
                         </div>
                     </div>
@@ -1223,6 +1244,19 @@
                 `;
             }
 
+            // DETEKSI LINK SHOPEE DI DALAM DESKRIPSI PRODUK & BUAT TOMBOL KLIK OTOMATIS
+            const shopeeLink = extractShopeeLink(p.deskripsi);
+            let htmlTombolShopee = '';
+            if (shopeeLink) {
+                htmlTombolShopee = `
+                    <a href="${shopeeLink}" target="_blank" rel="noopener noreferrer" 
+                       style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background-color: #ee4d2d; color: white; padding: 12px; border-radius: 8px; font-weight: bold; text-decoration: none; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(238, 77, 45, 0.3);">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+                        Klik di Sini untuk Link Pembelian Shopee
+                    </a>
+                `;
+            }
+
             let modalBody = document.getElementById("modal-product-body");
             modalBody.innerHTML = `
                 <div class="modal-img-slider" id="slider-${modalCardId}" style="height: 250px;">
@@ -1232,6 +1266,10 @@
                 </div>
                 <div style="font-size:16px; font-weight:bold; margin-bottom:4px;">${p.namaBurung}</div>
                 <div style="font-size:15px; color:#fa591d; font-weight:bold; margin-bottom:4px;">Rp ${Number(p.harga).toLocaleString('id-ID')}</div>
+                
+                <!-- TOMBOL SHOPEE AFFILIATE / LINK PEMBELIAN MUNCUL DI SINI SECARA OTOMATIS -->
+                ${htmlTombolShopee}
+
                 <div style="font-size:11px; color:var(--tokped-green); font-weight:bold; margin-bottom:2px;">Kios: ${p.penjualName || 'Kios Pakan'}</div>
                 <div style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">Kategori: ${p.kategori || 'Umum'}</div>
                 <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px; font-weight:bold;">Deskripsi:</div>
@@ -1652,18 +1690,13 @@
                             </div>
                             <video src="${v.videoUrl}" class="video-player" controls preload="metadata"></video>
                             <div class="video-footer">
-                                <div class="video-caption" style="white-space: pre-line;">${v.caption || ''}</div>
-                                <div class="video-actions">
-                                    <button class="video-action-btn">❤️ <span id="like-count-${v.id}">${v.likes || 0}</span> Suka</button>
-                                </div>
+                                <div class="video-caption">${v.caption || ''}</div>
                             </div>
                         </div>
                     `;
                 });
                 container.innerHTML = html;
-            } catch(e) {
-                container.innerHTML = "<p style='font-size: 12px; color: var(--text-muted); text-align: center;'>Gagal memuat video.</p>";
-            }
+            } catch(e) { console.error(e); }
         }
     </script>
 </body>
