@@ -55,9 +55,9 @@
             font-size: 12px;
         }
 
-        .menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; background: var(--card-bg); padding: 12px; border-radius: 12px; margin-bottom: 10px; text-align: center; }
-        .menu-icon-item { font-size: 11px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-main); position: relative; }
-        .menu-icon-circle { width: 42px; height: 42px; background: #e8f5e9; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .menu-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; background: var(--card-bg); padding: 12px; border-radius: 12px; margin-bottom: 10px; text-align: center; }
+        .menu-icon-item { font-size: 10px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-main); position: relative; }
+        .menu-icon-circle { width: 38px; height: 38px; background: #e8f5e9; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; }
 
         .category-scroll { display: flex; gap: 8px; overflow-x: auto; padding: 10px 15px; scrollbar-width: none; background: var(--card-bg); margin-bottom: 10px; border-radius: 8px; }
         .category-scroll::-webkit-scrollbar { display: none; }
@@ -257,7 +257,7 @@
         <div class="top-bar">
             <div class="search-container">
                 <span>🔍</span>
-                <input type="text" id="search-input" placeholder="Cari Murai Batu, Kenari, Pakan..." onkeyup="filterProduk()">
+                <input type="text" id="search-input" placeholder="Cari Murai Batu, Kenari, Pakan, Vitamin, Obat..." onkeyup="filterProduk()">
             </div>
             <div class="header-icons">
                 <span onclick="bukaPanelAdmin()" title="Panel Khusus Admin Rekber" style="font-size: 16px; background: #e8f5e9; padding: 6px 10px; border-radius: 20px; border: 1px solid #c8e6c9;">🛡️ Admin</span>
@@ -270,8 +270,8 @@
 
         <div id="home-view" class="section-view active-view">
             <div class="banner-rekber">
-                <h2>🛡️ Khusus Rekber Transaksi Burung</h2>
-                <p>Dana aman ditahan admin pusat sampai burung diterima sehat oleh pembeli.</p>
+                <h2>🛡️ Khusus Rekber Transaksi Burung & Perlengkapan</h2>
+                <p>Dana aman ditahan admin pusat sampai burung, pakan, vitamin, atau obat diterima dengan baik.</p>
             </div>
 
             <div class="running-text-box">
@@ -280,6 +280,7 @@
                 </marquee>
             </div>
 
+            <!-- MENU GRID DIPERBARUI DENGAN TAMBAHAN MENU OBAT -->
             <div class="menu-grid">
                 <div class="menu-icon-item" onclick="bukaStatusTransaksi('Semua')">
                     <div class="menu-icon-circle">📋</div>
@@ -294,18 +295,24 @@
                     <div class="menu-icon-circle">🧪</div>
                     <span>Vitamin</span>
                 </div>
+                <div class="menu-icon-item" onclick="bukaKategoriMenu('Obat')">
+                    <div class="menu-icon-circle">💊</div>
+                    <span>Obat</span>
+                </div>
                 <div class="menu-icon-item" onclick="bukaKategoriMenu('Sangkar')">
                     <div class="menu-icon-circle">🏠</div>
                     <span>Sangkar</span>
                 </div>
             </div>
 
+            <!-- KATEGORI SCROLL DIPERBARUI -->
             <div class="category-scroll">
                 <div class="cat-item active" onclick="filterKategori('Semua')">Semua Barang</div>
                 <div class="cat-item" onclick="filterKategori('Murai Batu')">Murai Batu</div>
                 <div class="cat-item" onclick="filterKategori('Kenari')">Kenari</div>
                 <div class="cat-item" onclick="filterKategori('Pakan')">Pakan & Kroto</div>
                 <div class="cat-item" onclick="filterKategori('Vitamin')">Vitamin & Doping</div>
+                <div class="cat-item" onclick="filterKategori('Obat')">Obat Burung</div>
                 <div class="cat-item" onclick="filterKategori('Sangkar')">Sangkar</div>
             </div>
 
@@ -449,18 +456,18 @@
             <div class="card">
                 <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px;" id="form-product-title-label">Posting Burung / Barang Baru (Via Link Foto)</div>
                 <input type="hidden" id="edit-product-id" value="">
-                <input type="text" id="bird-name" placeholder="Nama Burung (Contoh: Murai Batu Fighter)">
-                <input type="number" id="bird-price" placeholder="Harga (Contoh: 2500000)">
-                <input type="text" id="bird-category" placeholder="Kategori (Murai Batu / Kenari / Pakan / Vitamin / Sangkar)">
+                <input type="text" id="bird-name" placeholder="Nama Produk (Contoh: Pakan Voer Kasar / Vitamin Ebod / Obat Serak)">
+                <input type="number" id="bird-price" placeholder="Harga (Contoh: 50000)">
+                <input type="text" id="bird-category" placeholder="Kategori (Murai Batu / Kenari / Pakan / Vitamin / Obat / Sangkar)">
                 
                 <div style="margin: 8px 0; background: var(--bg-body); padding: 8px; border-radius: 6px; border: 1px solid var(--border-color);">
-                    <label style="font-size: 11px; color: var(--text-main); display: block; margin-bottom: 4px;"><b>Masukkan Link 1 sampai 3 Foto Burung:</b></label>
+                    <label style="font-size: 11px; color: var(--text-main); display: block; margin-bottom: 4px;"><b>Masukkan Link 1 sampai 3 Foto Produk:</b></label>
                     <input type="text" id="bird-img-1" placeholder="Link Foto 1 (Wajib): https://..." style="background: white; padding: 6px; margin-bottom: 4px;">
                     <input type="text" id="bird-img-2" placeholder="Link Foto 2 (Opsional): https://..." style="background: white; padding: 6px; margin-bottom: 4px;">
                     <input type="text" id="bird-img-3" placeholder="Link Foto 3 (Opsional): https://..." style="background: white; padding: 6px;">
                 </div>
 
-                <textarea id="bird-desc" rows="4" placeholder="Deskripsi lengkap (Contoh: Umur 8 bulan, volume tebal, mental jalan. Untuk video aksi & gerakannya, silahkan cek di 👉 Feed)"></textarea>
+                <textarea id="bird-desc" rows="4" placeholder="Deskripsi lengkap (Contoh: Vitamin khusus penggacor burung, kandungan herbal alami aman tanpa efek samping)"></textarea>
                 <button class="btn-primary" style="margin-top: 8px;" id="btn-submit-product" onclick="simpanProduk()">Publikasikan Produk</button>
                 <button class="btn-outline" style="width:100%; margin-top:6px; display:none;" id="btn-cancel-edit" onclick="resetFormProduk()">Batal Edit</button>
             </div>
@@ -1134,6 +1141,43 @@
                     if(!data.penjualPhone) data.penjualPhone = "082213054013";
                     semuaProduk.push({ id: d.id, ...data });
                 });
+
+                // TAMBAHAN DATA DEFAULT OTOMATIS: Pakan, Vitamin, & Obat Burung jika katalog masih kosong
+                if(semuaProduk.length === 0) {
+                    semuaProduk = [
+                        {
+                            id: 'default-pakan-1',
+                            namaBurung: 'Pakan Voer Kasar Premium Murai & Kacer',
+                            harga: 45000,
+                            kategori: 'Pakan',
+                            deskripsi: 'Pakan harian berkualitas tinggi kaya protein, minyak ikan, dan ekstrak buah untuk mendongkrak stamina serta kicauan burung.',
+                            fotoList: ['https://images.unsplash.com/photo-1589927986089-35812389d1f3'],
+                            penjualName: 'DF Canary Bird Pusat',
+                            penjualPhone: '082213054013'
+                        },
+                        {
+                            id: 'default-vitamin-1',
+                            namaBurung: 'Vitamin Penggacor Seketika (Supervit)',
+                            harga: 35000,
+                            kategori: 'Vitamin',
+                            deskripsi: 'Vitamin cair tetes untuk mengatasi burung macet bunyi, menambah mental tarung di lapangan, dan memperjernih volume suara.',
+                            fotoList: ['https://images.unsplash.com/photo-1584308666744-24d5c474f2ae'],
+                            penjualName: 'DF Canary Bird Pusat',
+                            penjualPhone: '082213054013'
+                        },
+                        {
+                            id: 'default-obat-1',
+                            namaBurung: 'Obat Tetes Ampuh Sembuhkan Serak & Flu Burung',
+                            harga: 40000,
+                            kategori: 'Obat',
+                            deskripsi: 'Obat khusus burung sesak napas, serak akibat cuaca, ngorok, dan lesu. Aman dan terbukti ampuh menyembuhkan dalam 3 hari.',
+                            fotoList: ['https://images.unsplash.com/photo-1550572017-edd951b55104'],
+                            penjualName: 'DF Canary Bird Pusat',
+                            penjualPhone: '082213054013'
+                        }
+                    ];
+                }
+
                 filterKategori(kategoriAktif);
                 if(auth.currentUser) loadBarangPenjual();
             } catch(e) { console.error(e); }
