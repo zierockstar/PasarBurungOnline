@@ -41,7 +41,19 @@
         .banner-rekber h2 { margin: 0 0 4px 0; font-size: 16px; }
         .banner-rekber p { margin: 0; font-size: 11px; opacity: 0.9; }
 
-        .running-text-box { background: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 6px; padding: 6px 10px; margin-bottom: 12px; overflow: hidden; white-space: nowrap; font-size: 12px; color: #2e7d32; font-weight: 500; }
+        .running-text-box { background: #111; border: 1px solid #333; border-radius: 6px; padding: 6px 10px; margin-bottom: 12px; overflow: hidden; }
+        @keyframes rgbGlow {
+            0% { color: #ff0000; text-shadow: 0 0 8px #ff0000; }
+            25% { color: #00ff00; text-shadow: 0 0 8px #00ff00; }
+            50% { color: #00ffff; text-shadow: 0 0 8px #00ffff; }
+            75% { color: #ff00ff; text-shadow: 0 0 8px #ff00ff; }
+            100% { color: #ff0000; text-shadow: 0 0 8px #ff0000; }
+        }
+        .rgb-marquee {
+            animation: rgbGlow 4s infinite linear;
+            font-weight: bold;
+            font-size: 12px;
+        }
 
         .menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; background: var(--card-bg); padding: 12px; border-radius: 12px; margin-bottom: 10px; text-align: center; }
         .menu-icon-item { font-size: 11px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-main); position: relative; }
@@ -125,6 +137,14 @@
 </head>
 <body>
 
+    <!-- OVERLAY AUDIO UNTUK MEMUNCULKAN NOTIFIKASI / SOUND PERTAMA KALI KETIK/SENTUH -->
+    <div id="audio-overlay" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(15,23,42,0.95); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; color:white; text-align:center; padding:20px;">
+        <div style="font-size: 48px; margin-bottom: 10px;">🦅</div>
+        <h2 style="margin:0 0 10px 0; font-size:18px;">SELAMAT DATANG DI REKBER PASAR BURUNG</h2>
+        <p style="font-size:12px; color:#94a3b8; margin-bottom:20px;">Sentuh tombol di bawah untuk mengaktifkan sistem suara & masuk ke aplikasi.</p>
+        <button class="btn-primary" style="max-width:220px; padding:12px; font-size:14px;" onclick="aktifkanAudioDanMasuk()">🔊 Masuk & Aktifkan Suara</button>
+    </div>
+
     <div id="splash-screen">
         <img src="https://i.ibb.co.com/gbVFfv7t/20260913-183859.jpg" class="splash-cover-img" alt="Sampul Pasar Burung" loading="eager">
         <div class="splash-content">
@@ -163,8 +183,8 @@
                 <div style="font-size: 12px; margin-bottom: 6px;">Masukkan Nomor Resi Pengiriman:</div>
                 <input type="text" id="input-no-resi" placeholder="Contoh: JNT1234567890 atau KIB-EXP">
                 
-                <div style="font-size: 12px; margin: 8px 0 4px 0;">Unggah Foto Paket / Bukti Kirim di Kios:</div>
-                <input type="file" id="input-foto-resi" accept="image/*" style="background: white; padding: 6px; margin-bottom: 10px;">
+                <div style="font-size: 12px; margin: 8px 0 4px 0;">Link Foto Paket / Bukti Kirim:</div>
+                <input type="text" id="input-foto-resi" placeholder="https://example.com/foto-resi.jpg" style="background: white; padding: 8px; margin-bottom: 10px;">
                 
                 <button class="btn-primary" onclick="submitResiPenjual()">Kirim Resi ke Admin & Pembeli via WA</button>
             </div>
@@ -180,9 +200,9 @@
             </div>
             <div class="modal-body">
                 <input type="hidden" id="review-trans-id" value="">
-                <div style="font-size: 12px; margin-bottom: 4px; font-weight: bold;">Unggah Foto Kondisi Burung/Barang Saat Tiba:</div>
-                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">Wajib melampirkan foto agar dana bisa diteruskan ke penjual.</div>
-                <input type="file" id="input-foto-diterima" accept="image/*" style="background: white; padding: 6px; margin-bottom: 10px;">
+                <div style="font-size: 12px; margin-bottom: 4px; font-weight: bold;">Link Foto Kondisi Burung/Barang Saat Tiba:</div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">Wajib melampirkan link foto agar dana bisa diteruskan ke penjual.</div>
+                <input type="text" id="input-foto-diterima" placeholder="https://example.com/foto-diterima.jpg" style="background: white; padding: 8px; margin-bottom: 10px;">
                 
                 <div style="font-size: 12px; margin-bottom: 4px; font-weight: bold;">Ulasan / Komentar Anda:</div>
                 <textarea id="input-ulasan-pembeli" rows="3" placeholder="Burung sehat, packing aman, mantap!"></textarea>
@@ -255,7 +275,9 @@
             </div>
 
             <div class="running-text-box">
-                <marquee scrollamount="5">⚡ Selamat datang di Pasar Online Burung & Feed Video Pendek • Cek foto & deskripsi, lalu tonton gerakan aslinya di menu Feed! ⚡</marquee>
+                <marquee scrollamount="5">
+                    <span class="rgb-marquee">✨ Aplikasi ini ditanggung jawab penuh oleh Lea Kejora / DF Canary Bird ✨</span>
+                </marquee>
             </div>
 
             <div class="menu-grid">
@@ -407,14 +429,14 @@
             </div>
         </div>
 
-        <!-- HALAMAN KELOLA PRODUK & PENGATURAN TOKO (DIAKSES DARI IKON RODA GIGI) -->
+        <!-- HALAMAN KELOLA PRODUK & PENGATURAN TOKO -->
         <div id="manage-products-view" class="section-view">
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
                 <button class="btn-outline" style="padding: 4px 10px; font-size: 11px;" onclick="switchTab('home-view')">← Kembali</button>
                 <div style="font-size: 15px; font-weight: bold;">⚙️ Kelola Barang & Pengaturan Toko</div>
             </div>
 
-            <!-- FORM SETELAN PROFIL TOKO (FOTO, NAMA, ALAMAT, TELEPON, LOKASI) -->
+            <!-- FORM SETELAN PROFIL TOKO -->
             <div class="card" style="border: 2px dashed var(--tokped-green); background: #f9fdf9;">
                 <div style="font-size: 14px; font-weight: bold; margin-bottom: 8px; color: var(--tokped-green);">🔧 Setelan Profil Toko / Kios Anda</div>
                 
@@ -422,8 +444,8 @@
                     <img id="preview-profile-img" src="https://images.unsplash.com/photo-1552728089-57bdde30beb3" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid var(--tokped-green);">
                 </div>
 
-                <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 2px;">Ganti Foto Profil / Toko:</label>
-                <input type="file" id="setting-profile-img" accept="image/*" style="background: white; padding: 4px;">
+                <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 2px;">Link Foto Profil / Toko:</label>
+                <input type="text" id="setting-profile-img" placeholder="https://example.com/logo-toko.jpg">
 
                 <label style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 6px; margin-bottom: 2px;">Nama Toko:</label>
                 <input type="text" id="setting-store-name" placeholder="Nama Toko / Kios Anda">
@@ -440,18 +462,19 @@
                 <button class="btn-primary" style="margin-top: 10px;" onclick="simpanPengaturanProfilToko()">Simpan Perubahan Profil Toko</button>
             </div>
 
+            <!-- FORM INPUT PRODUK MENGGUNAKAN LINK FOTO -->
             <div class="card">
-                <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px;" id="form-product-title-label">Posting Burung / Barang Baru</div>
+                <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px;" id="form-product-title-label">Posting Burung / Barang Baru (Via Link Foto)</div>
                 <input type="hidden" id="edit-product-id" value="">
                 <input type="text" id="bird-name" placeholder="Nama Burung (Contoh: Murai Batu Fighter)">
                 <input type="number" id="bird-price" placeholder="Harga (Contoh: 2500000)">
                 <input type="text" id="bird-category" placeholder="Kategori (Murai Batu / Kenari / Pakan / Vitamin / Sangkar)">
                 
                 <div style="margin: 8px 0; background: var(--bg-body); padding: 8px; border-radius: 6px; border: 1px solid var(--border-color);">
-                    <label style="font-size: 11px; color: var(--text-main); display: block; margin-bottom: 4px;"><b>Unggah 1 sampai 3 Foto Burung:</b></label>
-                    <input type="file" id="bird-img-1" accept="image/*" style="background: white; padding: 4px; margin-bottom: 4px;">
-                    <input type="file" id="bird-img-2" accept="image/*" style="background: white; padding: 4px; margin-bottom: 4px;">
-                    <input type="file" id="bird-img-3" accept="image/*" style="background: white; padding: 4px;">
+                    <label style="font-size: 11px; color: var(--text-main); display: block; margin-bottom: 4px;"><b>Masukkan Link 1 sampai 3 Foto Burung:</b></label>
+                    <input type="text" id="bird-img-1" placeholder="Link Foto 1 (Wajib): https://..." style="background: white; padding: 6px; margin-bottom: 4px;">
+                    <input type="text" id="bird-img-2" placeholder="Link Foto 2 (Opsional): https://..." style="background: white; padding: 6px; margin-bottom: 4px;">
+                    <input type="text" id="bird-img-3" placeholder="Link Foto 3 (Opsional): https://..." style="background: white; padding: 6px;">
                 </div>
 
                 <textarea id="bird-desc" rows="4" placeholder="Deskripsi lengkap (Contoh: Umur 8 bulan, volume tebal, mental jalan. Untuk video aksi & gerakannya, silahkan cek di 👉 Feed)"></textarea>
@@ -482,7 +505,6 @@
                 </div>
             </div>
 
-            <!-- HALAMAN PENGELOLA FOTO PROFIL & AKUN (MURNI UNTUK AKUN PENGGUNA) -->
             <div id="auth-box" class="card">
                 <div style="font-size: 15px; font-weight: bold; margin-bottom: 5px;">Masuk / Daftar Akun Pengguna & Penjual</div>
                 <input type="email" id="reg-email" placeholder="Email Wajib">
@@ -552,8 +574,6 @@
         let isFirstLoadTransactions = true;
 
         window.addEventListener('load', () => {
-            putarNadaKicauanBurung();
-
             setTimeout(() => {
                 const splash = document.getElementById('splash-screen');
                 if(splash) splash.classList.add('hidden-splash');
@@ -564,9 +584,19 @@
             inisialisasiRealtimeAdmin();
         });
 
+        // FUNGSI UNTUK MEMUNCULKAN SUARA/KICAUAN DENGAN INTERAKSI PERTAMA PENGGUNA
+        window.aktifkanAudioDanMasuk = function() {
+            const overlay = document.getElementById("audio-overlay");
+            if(overlay) overlay.style.display = 'none';
+            putarNadaKicauanBurung();
+        }
+
         function putarNadaKicauanBurung() {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
                 let now = audioCtx.currentTime;
                 
                 [0, 0.15, 0.3, 0.45].forEach((delay, idx) => {
@@ -587,7 +617,7 @@
                     osc.start(now + delay);
                     osc.stop(now + delay + 0.12);
                 });
-            } catch (e) { console.log("Audio dibatasi browser saat load."); }
+            } catch (e) { console.log("Audio dibatasi browser."); }
         }
 
         function picuNotifikasiAdmin() {
@@ -839,6 +869,7 @@
                     document.getElementById("setting-store-address").value = sData.address || "";
                     document.getElementById("setting-store-phone").value = sData.phone || "";
                     document.getElementById("setting-store-location").value = sData.location || "";
+                    document.getElementById("setting-profile-img").value = sData.profileImg || "";
                 } catch(e) { console.error(e); }
                 loadBarangPenjual();
             } else {
@@ -878,7 +909,7 @@
             const address = document.getElementById("setting-store-address").value;
             const phone = document.getElementById("setting-store-phone").value;
             const location = document.getElementById("setting-store-location").value;
-            const fileImg = document.getElementById("setting-profile-img").files[0];
+            const profileImgLink = document.getElementById("setting-profile-img").value;
 
             if(!storeName) {
                 alert("Nama toko wajib diisi!");
@@ -893,9 +924,8 @@
                     location: location || "Indonesia"
                 };
 
-                if(fileImg) {
-                    let profileImgBase64 = await bacaFileBase64(fileImg);
-                    updatePayload.profileImg = profileImgBase64;
+                if(profileImgLink) {
+                    updatePayload.profileImg = profileImgLink;
                 }
 
                 await setDoc(doc(db, "sellers", sellerDocIdGlobal), updatePayload, { merge: true });
@@ -947,15 +977,7 @@
             });
         });
 
-        function bacaFileBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = err => reject(err);
-                reader.readAsDataURL(file);
-            });
-        }
-
+        // FUNGSI SIMPAN PRODUK MENGGUNAKAN LINK FOTO
         window.simpanProduk = async function() {
             const editId = document.getElementById("edit-product-id").value;
             const name = document.getElementById("bird-name").value;
@@ -963,16 +985,16 @@
             const category = document.getElementById("bird-category").value || "Umum";
             const desc = document.getElementById("bird-desc").value;
             
-            const file1 = document.getElementById("bird-img-1").files[0];
-            const file2 = document.getElementById("bird-img-2").files[0];
-            const file3 = document.getElementById("bird-img-3").files[0];
+            const link1 = document.getElementById("bird-img-1").value.trim();
+            const link2 = document.getElementById("bird-img-2").value.trim();
+            const link3 = document.getElementById("bird-img-3").value.trim();
 
             if(!name || !price) { alert("Nama dan harga wajib diisi!"); return; }
             try {
                 let fotoList = [];
-                if(file1) fotoList.push(await bacaFileBase64(file1));
-                if(file2) fotoList.push(await bacaFileBase64(file2));
-                if(file3) fotoList.push(await bacaFileBase64(file3));
+                if(link1) fotoList.push(link1);
+                if(link2) fotoList.push(link2);
+                if(link3) fotoList.push(link3);
 
                 let sellerPhoneData = "082213054013";
                 let foundS = semuaPenjual.find(s => s.email === (auth.currentUser ? auth.currentUser.email : ""));
@@ -1021,7 +1043,7 @@
             document.getElementById("bird-img-1").value = "";
             document.getElementById("bird-img-2").value = "";
             document.getElementById("bird-img-3").value = "";
-            document.getElementById("form-product-title-label").textContent = "Posting Burung / Barang Baru";
+            document.getElementById("form-product-title-label").textContent = "Posting Burung / Barang Baru (Via Link Foto)";
             document.getElementById("btn-submit-product").textContent = "Publikasikan Produk";
             document.getElementById("btn-cancel-edit").style.display = "none";
         }
@@ -1038,6 +1060,10 @@
             document.getElementById("bird-price").value = p.harga;
             document.getElementById("bird-category").value = p.kategori || "";
             document.getElementById("bird-desc").value = p.deskripsi || "";
+            document.getElementById("bird-img-1").value = p.fotoList && p.fotoList[0] ? p.fotoList[0] : "";
+            document.getElementById("bird-img-2").value = p.fotoList && p.fotoList[1] ? p.fotoList[1] : "";
+            document.getElementById("bird-img-3").value = p.fotoList && p.fotoList[2] ? p.fotoList[2] : "";
+
             document.getElementById("form-product-title-label").textContent = "Edit Barang Kios";
             document.getElementById("btn-submit-product").textContent = "Simpan Perubahan";
             document.getElementById("btn-cancel-edit").style.display = "block";
@@ -1420,7 +1446,7 @@
         window.submitResiPenjual = async function() {
             const transId = document.getElementById("resi-trans-id").value;
             const noResi = document.getElementById("input-no-resi").value;
-            const fileInput = document.getElementById("input-foto-resi").files[0];
+            const fotoResiUrl = document.getElementById("input-foto-resi").value.trim();
 
             if(!noResi) {
                 alert("Nomor resi wajib diisi!");
@@ -1428,9 +1454,6 @@
             }
 
             try {
-                let fotoResiUrl = "";
-                if(fileInput) fotoResiUrl = await bacaFileBase64(fileInput);
-
                 await updateDoc(doc(db, "transactions", transId), {
                     status: "Sedang Dikirim",
                     noResi: noResi,
@@ -1445,7 +1468,7 @@
                     let cleanBuyerPhone = (t.buyerPhone || "").replace(/^0/, '62');
                     let adminPhone = "6282213054013";
 
-                    let pesanWA = `Halo, pesanan *${t.items}* telah dikirim oleh Penjual (*${t.sellerName}*).\n\n📦 *Nomor Resi:* ${noResi}\n\nSilakan cek status pengiriman di aplikasi. Jika barang nanti sudah sampai, mohon segera klik *Pesanan Selesai* dan unggah foto barang asli di aplikasi ya!`;
+                    let pesanWA = `Halo, pesanan *${t.items}* telah dikirim oleh Penjual (*${t.sellerName}*).\n\n📦 *Nomor Resi:* ${noResi}\n\nSilakan cek status pengiriman di aplikasi. Jika barang nanti sudah sampai, mohon segera klik *Pesanan Selesai* dan unggah link foto barang asli di aplikasi ya!`;
 
                     if(cleanBuyerPhone.length > 5) window.open(`https://wa.me/${cleanBuyerPhone}?text=${encodeURIComponent(pesanWA)}`, '_blank');
                     window.open(`https://wa.me/${adminPhone}?text=${encodeURIComponent("Laporan Resi Masuk:\n- No Resi: " + noResi + "\n- Pembeli: " + t.buyerName + "\n- Status: Sedang Dikirim")}`, '_blank');
@@ -1468,17 +1491,15 @@
 
         window.submitKonfirmasiSelesai = async function() {
             const transId = document.getElementById("review-trans-id").value;
-            const fileInput = document.getElementById("input-foto-diterima").files[0];
+            const fotoDiterimaUrl = document.getElementById("input-foto-diterima").value.trim();
             const ulasan = document.getElementById("input-ulasan-pembeli").value;
 
-            if(!fileInput) {
-                alert("Wajib melampirkan foto kondisi barang yang diterima untuk keamanan bersama!");
+            if(!fotoDiterimaUrl) {
+                alert("Wajib melampirkan link foto kondisi barang yang diterima untuk keamanan bersama!");
                 return;
             }
 
             try {
-                let fotoDiterimaUrl = await bacaFileBase64(fileInput);
-
                 await updateDoc(doc(db, "transactions", transId), {
                     status: "Pesanan Selesai",
                     reviewPhoto: fotoDiterimaUrl,
@@ -1524,7 +1545,7 @@
                 }
 
                 if(t.status === "Sedang Dikirim") {
-                    tombolAksiUser += `<button class="btn-primary" style="background:#2563eb; margin-top:6px; width:100%;" onclick="bukaModalReview('${t.id}')">✅ Konfirmasi Barang Sampai (Upload Foto & Ulasan)</button>`;
+                    tombolAksiUser += `<button class="btn-primary" style="background:#2563eb; margin-top:6px; width:100%;" onclick="bukaModalReview('${t.id}')">✅ Konfirmasi Barang Sampai (Link Foto & Ulasan)</button>`;
                 }
 
                 let noResiText = t.noResi && t.noResi !== "-" ? `<div style="font-size:11px; color:#2563eb; margin-bottom:2px;"><b>No Resi:</b> ${t.noResi} (Paket sedang di kurir ekspedisi)</div>` : '';
@@ -1601,23 +1622,27 @@
 
             try {
                 alert("Mengunggah video asli ke feed...");
-                let videoUrl = await bacaFileBase64(fileInput.files[0]);
-                let uploaderName = auth.currentUser ? auth.currentUser.email : "guest@market.com";
+                const reader = new FileReader();
+                reader.readAsDataURL(fileInput.files[0]);
+                reader.onload = async () => {
+                    let videoUrl = reader.result;
+                    let uploaderName = auth.currentUser ? auth.currentUser.email : "guest@market.com";
 
-                await addDoc(collection(db, "feed_videos"), {
-                    videoUrl: videoUrl,
-                    caption: caption,
-                    uploader: uploaderName,
-                    likes: 0,
-                    createdAt: new Date()
-                });
+                    await addDoc(collection(db, "feed_videos"), {
+                        videoUrl: videoUrl,
+                        caption: caption,
+                        uploader: uploaderName,
+                        likes: 0,
+                        createdAt: new Date()
+                    });
 
-                alert("Video pendek berhasil dipublikasikan di Feed!");
-                document.getElementById("video-caption-input").value = "";
-                document.getElementById("video-file-input").value = "";
-                document.getElementById("trim-section").classList.add("hidden");
-                loadFeedVideo();
-                switchTab('feed-view');
+                    alert("Video pendek berhasil dipublikasikan di Feed!");
+                    document.getElementById("video-caption-input").value = "";
+                    document.getElementById("video-file-input").value = "";
+                    document.getElementById("trim-section").classList.add("hidden");
+                    loadFeedVideo();
+                    switchTab('feed-view');
+                };
             } catch(e) {
                 alert("Gagal mengunggah video: " + e.message);
             }
