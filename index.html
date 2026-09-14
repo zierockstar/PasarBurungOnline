@@ -407,10 +407,37 @@
             </div>
         </div>
 
+        <!-- HALAMAN KELOLA PRODUK & PENGATURAN TOKO (DIAKSES DARI IKON RODA GIGI) -->
         <div id="manage-products-view" class="section-view">
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
                 <button class="btn-outline" style="padding: 4px 10px; font-size: 11px;" onclick="switchTab('home-view')">← Kembali</button>
-                <div style="font-size: 15px; font-weight: bold;">⚙️ Kelola Barang Kios Anda</div>
+                <div style="font-size: 15px; font-weight: bold;">⚙️ Kelola Barang & Pengaturan Toko</div>
+            </div>
+
+            <!-- FORM SETELAN PROFIL TOKO (FOTO, NAMA, ALAMAT, TELEPON, LOKASI) -->
+            <div class="card" style="border: 2px dashed var(--tokped-green); background: #f9fdf9;">
+                <div style="font-size: 14px; font-weight: bold; margin-bottom: 8px; color: var(--tokped-green);">🔧 Setelan Profil Toko / Kios Anda</div>
+                
+                <div style="text-align: center; margin-bottom: 10px;">
+                    <img id="preview-profile-img" src="https://images.unsplash.com/photo-1552728089-57bdde30beb3" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid var(--tokped-green);">
+                </div>
+
+                <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 2px;">Ganti Foto Profil / Toko:</label>
+                <input type="file" id="setting-profile-img" accept="image/*" style="background: white; padding: 4px;">
+
+                <label style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 6px; margin-bottom: 2px;">Nama Toko:</label>
+                <input type="text" id="setting-store-name" placeholder="Nama Toko / Kios Anda">
+
+                <label style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 6px; margin-bottom: 2px;">Alamat:</label>
+                <textarea id="setting-store-address" rows="2" placeholder="Alamat Lengkap Toko"></textarea>
+
+                <label style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 6px; margin-bottom: 2px;">No. Telepon / WhatsApp:</label>
+                <input type="text" id="setting-store-phone" placeholder="Contoh: 08123456789">
+
+                <label style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 6px; margin-bottom: 2px;">Lokasi (Kota / Titik Wilayah):</label>
+                <input type="text" id="setting-store-location" placeholder="Contoh: Jakarta Selatan">
+
+                <button class="btn-primary" style="margin-top: 10px;" onclick="simpanPengaturanProfilToko()">Simpan Perubahan Profil Toko</button>
             </div>
 
             <div class="card">
@@ -455,8 +482,9 @@
                 </div>
             </div>
 
+            <!-- HALAMAN PENGELOLA FOTO PROFIL & AKUN (MURNI UNTUK AKUN PENGGUNA) -->
             <div id="auth-box" class="card">
-                <div style="font-size: 15px; font-weight: bold; margin-bottom: 5px;">Masuk / Daftar Akun Penjual</div>
+                <div style="font-size: 15px; font-weight: bold; margin-bottom: 5px;">Masuk / Daftar Akun Pengguna & Penjual</div>
                 <input type="email" id="reg-email" placeholder="Email Wajib">
                 <input type="password" id="reg-password" placeholder="Kata Sandi">
                 <input type="text" id="reg-phone" placeholder="Nomor WhatsApp Aktif Penjual (Contoh: 08123456789)">
@@ -467,9 +495,18 @@
             </div>
 
             <div id="dashboard-box" class="card hidden">
-                <div style="font-weight: bold; font-size: 14px;" id="profile-storename-display">-</div>
-                <p style="font-size: 11px; color: var(--tokped-green);" id="user-display-email">-</p>
-                <button class="btn-outline" style="width:100%; margin-top:8px;" onclick="switchTab('manage-products-view')">⚙️ Kelola Produk Kios Saya</button>
+                <div style="font-size: 14px; font-weight: bold; color: var(--tokped-green); margin-bottom: 10px;">👤 Kelola Profil & Akun Anda</div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                    <img id="profile-display-img" src="https://images.unsplash.com/photo-1552728089-57bdde30beb3" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
+                    <div>
+                        <div style="font-weight: bold; font-size: 14px;" id="profile-storename-display">-</div>
+                        <p style="font-size: 11px; color: var(--tokped-green); margin: 0;" id="user-display-email">-</p>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 2px;"><b>Alamat:</b> <span id="profile-display-address">-</span></div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 2px;"><b>Telepon:</b> <span id="profile-display-phone">-</span></div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;"><b>Lokasi:</b> <span id="profile-display-location">-</span></div>
+
                 <button class="btn-danger" id="btn-logout" style="margin-top: 8px;">Keluar (Logout)</button>
             </div>
             <p id="status-msg" style="text-align: center; font-size: 12px;"></p>
@@ -515,7 +552,6 @@
         let isFirstLoadTransactions = true;
 
         window.addEventListener('load', () => {
-            // Memutar nada kicauan burung saat aplikasi pertama kali dibuka (bersamaan dengan splash screen)
             putarNadaKicauanBurung();
 
             setTimeout(() => {
@@ -528,13 +564,11 @@
             inisialisasiRealtimeAdmin();
         });
 
-        // Fungsi Audio Nada Kicauan Burung Pembuka
         function putarNadaKicauanBurung() {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 let now = audioCtx.currentTime;
                 
-                // Efek modulasi suara bernada tinggi menyerupai kicauan burung
                 [0, 0.15, 0.3, 0.45].forEach((delay, idx) => {
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
@@ -771,8 +805,24 @@
                     const qs = await getDocs(q);
                     if (!qs.empty) {
                         sellerDocIdGlobal = qs.docs[0].id;
-                        currentUserStoreName = qs.docs[0].data().storeName || "Kios Kicau";
+                        let sData = qs.docs[0].data();
+                        currentUserStoreName = sData.storeName || "Kios Kicau";
+                        
                         document.getElementById("profile-storename-display").textContent = currentUserStoreName;
+                        document.getElementById("profile-display-address").textContent = sData.address || "-";
+                        document.getElementById("profile-display-phone").textContent = sData.phone || "-";
+                        document.getElementById("profile-display-location").textContent = sData.location || "-";
+                        
+                        if(sData.profileImg) {
+                            document.getElementById("profile-display-img").src = sData.profileImg;
+                            document.getElementById("preview-profile-img").src = sData.profileImg;
+                        }
+
+                        // Isi form setelan profil toko
+                        document.getElementById("setting-store-name").value = sData.storeName || "";
+                        document.getElementById("setting-store-address").value = sData.address || "";
+                        document.getElementById("setting-store-phone").value = sData.phone || "";
+                        document.getElementById("setting-store-location").value = sData.location || "";
                     }
                 } catch(e) { console.error(e); }
                 loadBarangPenjual();
@@ -782,6 +832,49 @@
                 currentUserStoreName = "Kicau Mania";
             }
         });
+
+        // FUNGSI SIMPAN SETELAN PROFIL TOKO (FOTO, NAMA, ALAMAT, TELEPON, LOKASI)
+        window.simpanPengaturanProfilToko = async function() {
+            if(!auth.currentUser) {
+                alert("Silakan login terlebih dahulu sebagai penjual.");
+                return;
+            }
+            if(!sellerDocIdGlobal) {
+                alert("Data profil penjual belum ditemukan di database.");
+                return;
+            }
+
+            const storeName = document.getElementById("setting-store-name").value;
+            const address = document.getElementById("setting-store-address").value;
+            const phone = document.getElementById("setting-store-phone").value;
+            const location = document.getElementById("setting-store-location").value;
+            const fileImg = document.getElementById("setting-profile-img").files[0];
+
+            if(!storeName) {
+                alert("Nama toko wajib diisi!");
+                return;
+            }
+
+            try {
+                let updatePayload = {
+                    storeName: storeName,
+                    address: address,
+                    phone: phone,
+                    location: location
+                };
+
+                if(fileImg) {
+                    let profileImgBase64 = await bacaFileBase64(fileImg);
+                    updatePayload.profileImg = profileImgBase64;
+                }
+
+                await updateDoc(doc(db, "sellers", sellerDocIdGlobal), updatePayload);
+                alert("Pengaturan profil toko berhasil diperbarui!");
+                location.reload();
+            } catch(e) {
+                alert("Gagal memperbarui profil: " + e.message);
+            }
+        }
 
         document.getElementById("btn-register-store").addEventListener("click", async () => {
             const email = document.getElementById("reg-email").value;
@@ -796,7 +889,15 @@
             }
             try {
                 const cred = await createUserWithEmailAndPassword(auth, email, password);
-                await addDoc(collection(db, "sellers"), { uid: cred.user.uid, email, phone, storeName, address });
+                await addDoc(collection(db, "sellers"), { 
+                    uid: cred.user.uid, 
+                    email, 
+                    phone, 
+                    storeName, 
+                    address,
+                    location: "Indonesia",
+                    profileImg: "https://images.unsplash.com/photo-1552728089-57bdde30beb3"
+                });
                 alert("Pendaftaran Kios Berhasil!");
                 loadSemuaPenjual();
             } catch(e) { alert("Gagal: " + e.message); }
@@ -1219,16 +1320,13 @@
             }
         }
 
-        // ==================== FITUR PEMBATALAN PESANAN OLEH PEMBELI (DITAMBAHKAN) ====================
         window.batalkanPesananPembeli = async function(transId) {
             let alasanBatal = prompt("Masukkan alasan pembatalan pesanan:");
-            if (alasanBatal === null) return; // Jika dibatalkan
+            if (alasanBatal === null) return;
 
             try {
-                // Membunyikan suara alarm / peringatan saat pembatalan
                 picuNotifikasiAdmin();
 
-                // Ubah status di database firestore menjadi Dibatalkan
                 await updateDoc(doc(db, "transactions", transId), {
                     status: "Dibatalkan",
                     alasanBatal: alasanBatal || "Pembeli membatalkan pesanan"
@@ -1243,7 +1341,6 @@
                     
                     let pesanBatal = `⚠️ *PEMBATALAN PESANAN REKBER* ⚠️\n\nPembeli telah **membatalkan** pesanan berikut:\n- Pembeli: ${t.buyerName} (${t.buyerPhone})\n- Barang: ${t.items}\n- Total: Rp ${Number(t.total || 0).toLocaleString('id-ID')}\n- Alasan: "${alasanBatal}"\n\nMohon segera diproses atau kembalikan dana jika sudah ditransfer. Terima kasih.`;
 
-                    // Kirim ke WhatsApp Admin Pusat & Penjual secara otomatis
                     window.open(`https://wa.me/${adminPhone}?text=${encodeURIComponent(pesanBatal)}`, '_blank');
                     window.open(`https://wa.me/${cleanSellerPhone}?text=${encodeURIComponent(pesanBatal)}`, '_blank');
                 }
@@ -1254,7 +1351,6 @@
             }
         }
 
-        // ==================== FITUR RESI OLEH PENJUAL ====================
         window.bukaModalResi = function(transId) {
             document.getElementById("resi-trans-id").value = transId;
             document.getElementById("input-no-resi").value = "";
@@ -1304,7 +1400,6 @@
             }
         }
 
-        // ==================== FITUR KONFIRMASI PEMBELI (FOTO + ULASAN) ====================
         window.bukaModalReview = function(transId) {
             document.getElementById("review-trans-id").value = transId;
             document.getElementById("input-foto-diterima").value = "";
@@ -1364,9 +1459,7 @@
             let html = "";
             filtered.forEach(t => {
                 let tombolAksiUser = "";
-                let currentUserEmail = auth.currentUser ? auth.currentUser.email : "";
                 
-                // Tombol Batalkan Pesanan khusus jika status masih "Menunggu Verifikasi Dana" atau "Sedang Dikemas"
                 if(t.status === "Menunggu Verifikasi Dana" || t.status === "Sedang Dikemas") {
                     tombolAksiUser += `<button class="btn-danger" style="margin-top:6px; width:100%;" onclick="batalkanPesananPembeli('${t.id}')">❌ Batalkan Pesanan</button>`;
                 }
